@@ -41,3 +41,4 @@ source("./Scripts/mortality_functions.R")
 
 mortality_function(df)
 
+

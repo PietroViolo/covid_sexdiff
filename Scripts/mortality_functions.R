@@ -61,6 +61,3 @@ mortality_function <- function(df) {
   return(df_mort)
   
 }
-
-
-
