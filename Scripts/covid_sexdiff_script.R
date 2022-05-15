@@ -15,12 +15,13 @@ library(ggthemes)
 library(mortalitySmooth)
 library(remotes)
 library(covidAgeData)
+library(lubridate)
 
 # Download data
-df <- download_covid(data = "Output_5")
+data <- download_covid(data = "Output_5")
 
 # filter for United States only
-df <- df %>% filter(Country == "USA")
+df <- data %>% filter(Country == "USA")
 
 # Transform to date
 df <- df %>% mutate(Date = as.Date(Date, tryFormats = c("%d.%m.%Y")))
@@ -34,11 +35,24 @@ df <- df %>% mutate(Age = ifelse(Age >=85, 85, Age)) %>%
   ungroup()
 
 
-
 #'* Function to calculate daily male and female mortality ratios, and their ratio.*
+# We are working with cumulative data.
 
 source("./Scripts/mortality_functions.R")
 
-mortality_function(df)
+df_mort <- mortality_function(df)
 
 
+
+#'* Group by month and sum up all mortality rates to obtain monthly mortality rate*
+
+# df_mort_month <- df_mort %>% 
+#   group_by(month = lubridate::floor_date(Date, "month"),
+#            Region,
+#            Age) %>%
+#   summarise(m = sum(m, na.rm = T),
+#             f = sum(f, na.rm = T))
+
+
+
+#'* Calcu*

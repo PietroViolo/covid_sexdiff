@@ -45,19 +45,6 @@ mortality_function <- function(df) {
   
   # Average population exposition per day
   
-  df_mort <- df_mort %>% mutate(Pop = Pop/365)
-  
-  # Daily mortality rate is calculated by doing Deaths day / pop day
-  
-  df_mort <- df_mort %>% mutate(mortality_rate = Deaths/Pop)
-  
-  # Keep only Region, date, sex and mortality rate, then pivot wider by sex.
-  
-  df_mort <- df_mort %>% select(Region, Date, Sex, Age, mortality_rate)
-  
-  df_mort <- df_mort %>% 
-    tidyr::pivot_wider(names_from = Sex, values_from = mortality_rate)
-  
   return(df_mort)
   
 }
