@@ -35,7 +35,9 @@ df <- df %>% mutate(Age = ifelse(Age >=85, 85, Age)) %>%
 
 
 
-#'* Function to calculate male and female mortality ratios, and their ratio.*
+#'* Function to calculate daily male and female mortality ratios, and their ratio.*
 
+source("./Scripts/mortality_functions.R")
 
+mortality_function(df)
 
