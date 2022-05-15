@@ -10,7 +10,12 @@
 # Libraries
 library(ggthemes)
 library(mortalitySmooth)
+library(remotes)
 
 # Import data
 covid_data <- read.csv("./Data/Provisional_COVID-19_Deaths_by_Sex_and_Age.csv")
+
+remotes::install_github("eshom/covid-age-data")
+
+covid_data
 
