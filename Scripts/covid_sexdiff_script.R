@@ -7,15 +7,35 @@
 # Date : May 15 2022                                                           #
 #------------------------------------------------------------------------------#
 
+#remotes::install_github("eshom/covid-age-data")
+
 # Libraries
+library(tidyverse)
 library(ggthemes)
 library(mortalitySmooth)
 library(remotes)
+library(covidAgeData)
 
-# Import data
-covid_data <- read.csv("./Data/Provisional_COVID-19_Deaths_by_Sex_and_Age.csv")
+# Download data
+df <- download_covid(data = "Output_5")
 
-remotes::install_github("eshom/covid-age-data")
+# filter for United States only
+df <- df %>% filter(Country == "USA")
 
-covid_data
+# Transform to date
+df <- df %>% mutate(Date = as.Date(Date, tryFormats = c("%d.%m.%Y")))
+
+# Sum up groups that are over 85+, because we only have 85+ population groups
+# in Census data
+
+df <- df %>% mutate(Age = ifelse(Age >=85, 85, Age)) %>% 
+  group_by(Region, Date, Sex, Age) %>% 
+  summarise(Deaths = sum(Deaths)) %>% 
+  ungroup()
+
+
+
+#'* Function to calculate male and female mortality ratios, and their ratio.*
+
+
 
