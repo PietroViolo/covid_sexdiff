@@ -42,6 +42,8 @@ source("./Scripts/mortality_functions.R")
 
 df_mort <- mortality_function(df)
 
+df_mort %>% arrange(Date)
+
 
 
 #'* Group by month and sum up all mortality rates to obtain monthly mortality rate*
@@ -52,7 +54,3 @@ df_mort <- mortality_function(df)
 #            Age) %>%
 #   summarise(m = sum(m, na.rm = T),
 #             f = sum(f, na.rm = T))
-
-
-
-#'* Calcu*

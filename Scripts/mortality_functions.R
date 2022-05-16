@@ -48,3 +48,20 @@ mortality_function <- function(df) {
   return(df_mort)
   
 }
+
+
+
+#' #'* Function to calculate difference in mortality by month*
+#' 
+#' # By doing so, we will deduce the number of deaths per month
+#' 
+#' every_month <- function(df){
+#'   
+#'   df_month <- df %>% filter(Date == lubridate::floor_date(Date, "month"))
+#'   
+#'   x<-df_month %>% arrange(Region)
+#'   
+#' }
+
+
+
