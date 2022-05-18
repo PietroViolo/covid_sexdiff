@@ -5,6 +5,71 @@
 # Date : May 15 2022                                                           #
 #------------------------------------------------------------------------------#
 
+library(covidAgeData)
+library(lubridate)
+library(stats)
+
+#'* Calculate deaths for the first of every month.*
+
+# Download data
+data <- download_covid(data = "Output_5")
+
+# filter for United States only
+df <- data %>% filter(Country == "USA")
+
+# Transform to date
+df <- df %>% mutate(Date = as.Date(Date, tryFormats = c("%d.%m.%Y")))
+
+# Sum up groups that are over 85+, because we only have 85+ population groups
+# in Census data
+
+df <- df %>% mutate(Age = ifelse(Age >=85, 85, Age)) %>% 
+  group_by(Region, Date, Sex, Age) %>% 
+  summarise(Deaths = sum(Deaths)) %>% 
+  ungroup()
+
+# keep males and females
+
+df <- df %>% filter(Sex != "b")
+
+# Now, we have various dates (but not all) available, we need to find the
+# earliest and dates date available for each month and each state/age group
+
+df <- df %>%
+  dplyr::mutate(year = lubridate::year(Date), 
+                month = lubridate::month(Date), 
+                day = lubridate::day(Date))
+
+# earliest day for each month
+df_min_dates <- df %>% 
+  group_by(Region,Sex,Age,year,month) %>% 
+  summarise(day = min(day))
+
+df_min_dates <- left_join(df_min_dates,df, by = c("Region", "Sex","Age","year","month","day"))
+
+# Difference in days and deaths between two dates
+# Number of days until first of each month
+
+df_min_dates <-df_min_dates %>% ungroup() %>% 
+  group_by("Region","Sex","Age") %>% 
+  mutate(days_between = (interval(Date, dplyr::lead(Date)) %/% days(1)),
+         deaths_between = dplyr::lead(Deaths)-Deaths,
+         days_before_first = (interval(Date, floor_date(dplyr::lead(Date),"month"))) %/% days(1),
+         Deaths_first = Deaths + deaths_between/days_between * days_before_first) 
+
+# Deaths on the first of the month
+# First dates available for every group has taken the value of the last 85+, we
+# must eliminate that discrepancy.
+
+df_first_month <- df_min_dates %>% mutate(Deaths = dplyr::lag(Deaths_first),
+                                          day = 1) %>% ungroup() %>% 
+  select(Region, Sex, Age, year, month, day, Deaths) %>% 
+  mutate(Deaths = ifelse((Age == 0) & (Deaths > 220), NA, Deaths)) %>% 
+  na.omit() %>% 
+  filter(Deaths >= 0)
+
+save(df_first_month, file = "./Data/df_first_month.RData")
+
 
 
 #'* Function to calculate daily male and female mortality ratios, and their ratio.*
