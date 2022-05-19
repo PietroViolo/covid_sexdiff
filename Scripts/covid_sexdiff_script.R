@@ -12,36 +12,32 @@
 # Libraries
 library(tidyverse)
 library(ggthemes)
-library(mortalitySmooth)
 library(remotes)
+library(lubridate)
+
+# Data
+load("./Data/df_first_month.RData")
 
 
-
-
-
-
-
-
-
-
-#'* Function to calculate daily male and female mortality ratios, and their ratio.*
+#'* Function to attach population at risk for a given subgroup*
 # We are working with cumulative data.
 
 source("./Scripts/mortality_functions.R")
 
-df_mort <- mortality_function(df)
+# Calculate numbers of deaths that have occurred during the month
 
-df_mort %>% arrange(Date)
+df_monthly_deaths <- df_first_month %>% group_by(Region, Sex, Age) %>% 
+  mutate(Deaths_per_month = dplyr::lead(Deaths) - Deaths)
 
-splinefun(, method = "monoH.FC")
+df_monthly_deaths <- cbind(df_first_month,df_monthly_deaths$Deaths_per_month) 
+
+# Mortality rate : attach population
+df_mort <- mortality_function(df_monthly_deaths)
 
 
+df_mort <- df_mort %>% mutate(monthly_mort_rate = Deaths_per_month/(Pop/12)) %>% 
+  select(-Deaths_per_month,-Pop)
 
-#'* Group by month and sum up all mortality rates to obtain monthly mortality rate*
-
-# df_mort_month <- df_mort %>% 
-#   group_by(month = lubridate::floor_date(Date, "month"),
-#            Region,
-#            Age) %>%
-#   summarise(m = sum(m, na.rm = T),
-#             f = sum(f, na.rm = T))
+# pivot wider for males and females on the same line to calculate
+# male-excess mortality
+pivot_wider(df_mort, names_from = Sex, values_from = monthly_mort_rate)
