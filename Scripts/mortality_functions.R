@@ -5,6 +5,7 @@
 # Date : May 15 2022                                                           #
 #------------------------------------------------------------------------------#
 
+library(tidyverse)
 library(covidAgeData)
 library(lubridate)
 library(stats)
@@ -76,51 +77,50 @@ function(temporary){
   save(df_first_month, file = "./Data/df_first_month.RData")
   
   
-}
-
-# Monotonic splines by Tim Riffe
-
-
-
-regions <- df %>% pull(Region) %>% unique()
-ages <- df %>% pull(Age) %>% unique()
-spline_deaths <- c()
-
-for(state in state.name){
-  for(sex in c("f","m")){
-    for(age in ages){
-      
-      all_dates <- df %>% filter(Region == state & Sex == sex & Age == age)
-      
-      first_of_month <- floor_date(all_dates$Date, "month") %>% unique()
-      
-      monodeaths <- splinefun(as.integer(all_dates$Date), all_dates$Deaths, method = "monoH.FC")(as.integer(first_of_month))
-      
-      monodeaths <- cbind(state, as.character(first_of_month), sex, age,  monodeaths)
-      
-      monodeaths <- monodeaths[-1,]
-      
-      spline_deaths <- rbind(spline_deaths, monodeaths)
-      
+  
+  
+  # Monotonic splines by Tim Riffe
+  
+  regions <- df %>% pull(Region) %>% unique()
+  ages <- df %>% pull(Age) %>% unique()
+  spline_deaths <- c()
+  
+  for(state in state.name){
+    for(sex in c("f","m")){
+      for(age in ages){
+        
+        all_dates <- df %>% filter(Region == state & Sex == sex & Age == age)
+        
+        first_of_month <- floor_date(all_dates$Date, "month") %>% unique()
+        
+        monodeaths <- splinefun(as.integer(all_dates$Date), all_dates$Deaths, method = "monoH.FC")(as.integer(first_of_month))
+        
+        monodeaths <- cbind(state, as.character(first_of_month), sex, age,  monodeaths)
+        
+        monodeaths <- monodeaths[-1,]
+        
+        spline_deaths <- rbind(spline_deaths, monodeaths)
+        
+      }
     }
+    print(state)
   }
-  print(state)
+  
+  new <- spline_deaths %>% data.frame(.) 
+  colnames(new) <- c("Region", "date", "Sex", "Age", "Deaths_mono")
+  new <- new %>% mutate(date = as.Date(as.character(date)),
+                        Age = as.integer(Age),
+                        Deaths_mono = as.double(Deaths_mono))
+  
+  
+  # All values are essentially the same
+  joined <- left_join(df_first_month,new) %>% select(Region,Sex,Age, date, Deaths, Deaths_mono)
+  
+  save(joined, file = "./Data/df_first_month.RData")
+  
+  
+  
 }
-
-new <- spline_deaths %>% data.frame(.) 
-colnames(new) <- c("Region", "date", "Sex", "Age", "Deaths_mono")
-new <- new %>% mutate(date = as.Date(as.character(date)),
-                      Age = as.integer(Age),
-                      Deaths_mono = as.double(Deaths_mono))
-
-nrow(new)
-nrow(df_first_month)
-
-
-# All values are essentially the sames
-joined <- left_join(df_first_month,new) %>% select(Region,Sex,Age, date, Deaths, Deaths_mono)
-
-x<-joined %>% mutate(Deaths - Deaths_mono)
 
 
 
