@@ -4,7 +4,7 @@ Male mortality due to COVID-19 has been found to be higher than women's due to a
 
 ## Where we are now
 
-Using the COVerage database, we estimated the number of COVID-19 related deaths in every state and age group by month. By using the population per age group provided by the Census Bureau, we calculated the monthly mortality rate and determined the male-excess mortality rate by month. A first preview of the problem can be observed through heatmaps.
+Using the COVerAGE database, we estimated the number of COVID-19 related deaths in every state and age group by month. By using the population per age group provided by the Census Bureau, we calculated the monthly mortality rate and determined the male-excess mortality rate by month. A first preview of the problem can be observed through heatmaps.
 
 First, with linear-intrapolated deaths :
 
