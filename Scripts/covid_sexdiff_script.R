@@ -89,12 +89,12 @@ for(state in states){
     theme_light() +
     labs(x = "Month",
          y = "Age group",
-         title = paste("COVID-19 mortality ratio by month, ",state,", 2021-2022", sep = ""))) +
+         title = paste("COVID-19 mortality ratio by month, ",state,", 2021-2022", sep = "")) +
     scale_fill_continuous_diverging(trans = "log",
                                     breaks = c(0.5,1,2,4),
                                     limits = c(0.5,4),
                                     palette = "Purple-Green",
-                                    name = "COVID-19 mortality ratio")
+                                    name = "COVID-19 mortality ratio"))
   
   dev.off()
   
