@@ -15,6 +15,7 @@ library(ggthemes)
 library(remotes)
 library(lubridate)
 library(viridis)
+library(colorspace)
 
 # Data
 load("./Data/df_first_month.RData")
@@ -53,9 +54,6 @@ excess_male_mort <- pivot_wider(df_mort %>%  select(Region, Sex, Age, date, mont
 
 excess_male_mort <- excess_male_mort %>% mutate(excess_male = m/f)
 
-excess_male_mort %>% ggplot(aes(x = excess_male, color = as.character(Age))) + 
-  geom_histogram(binwidth = 0.1, fill = "white", position = "dodge") + 
-  xlim(c(0,7)) 
 
 # male-excess mortality with mono deaths
 
@@ -77,6 +75,7 @@ excess_male_mort %>% ggplot(aes(x = excess_male, color = as.character(Age))) +
 
 states <- excess_male_mort %>% pull(Region) %>% unique()
 
+
 for(state in states){
   
   test <- excess_male_mort %>% filter(Region == state)
@@ -84,17 +83,18 @@ for(state in states){
   png(file = paste("./Graphs/",state,"_excess.png", sep = ""), res = 300, width = 3000, height = 2600)
   
   print(test %>% ggplot(aes(x = date, y = Age)) +
-    geom_tile(aes(fill = excess_male), width = 31) +
-    scale_fill_viridis(trans="log",
-                       breaks=c(0.5,1,2,4),
-                       limits=c(0.5,4),
-                       name = "Male excess mortality") +
+    geom_tile(aes(fill = excess_male), width = 31)  +
     coord_cartesian(ylim = c(30, 85),
                     xlim = c(as.Date("2021-01-01"),as.Date("2022-01-01"))) +
     theme_light() +
     labs(x = "Month",
          y = "Age group",
-         title = paste("Male excess mortality by month, ",state,", 2021-2022", sep = "")))
+         title = paste("COVID-19 mortality ratio by month, ",state,", 2021-2022", sep = ""))) +
+    scale_fill_continuous_diverging(trans = "log",
+                                    breaks = c(0.5,1,2,4),
+                                    limits = c(0.5,4),
+                                    palette = "Purple-Green",
+                                    name = "COVID-19 mortality ratio")
   
   dev.off()
   
