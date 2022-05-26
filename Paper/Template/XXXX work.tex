@@ -1,0 +1,310 @@
+﻿%  ~~~~~ INSTRUCTIONS FOR FORMATTING (FOR MORE DETAILS, SEE "Instructions and Cheat Sheet.pdf" in .zip file ~~~~~~
+%-----------------------------------------------------------------------------------------------------------------
+
+% COVER PAGE & HEADINGS
+% - To begin, please see the "cover.sty" file and enter the details of the following details of the paper:
+
+% -	Add author(s) information:
+%     - Underneath the cover page information, you can enter your author and co-author details. 
+%     - Please leave these fields blank if you are submitting a new paper with DemRes.  
+%--------------------------------------------------------------------------
+
+% REFERENCES 
+% - See the “refs.bib” as a guide
+%     - Please format using our house style guide (https://www.demographic-research.org/files/DemRes%20Reference%20Guidelines.pdf)
+%        - Enter information below, in REFERENCES section.
+%--------------------------------------------------------------------------
+
+% APPENDIX (if applicable)
+% - Please only add the title "Appendix" or "Appendices" to the TOC (not the subsections). 
+%     - All appendices should be alphabetical (e.g., "A. Section name" followed by "Table A-1," etc., then "B. Section name" followed by "Table B-2", etc.).  
+%        - Enter information below, in APPENDIX section.
+
+%--------------------------------------------------------------------------
+
+% IN-TEXT 
+% - Please leave all packages and encoding as is. 
+%     - E.g., the spacing, font size and colour, headings, etc. match our house style and should not be changed. 
+
+%	PRAELEGOMENA  %%
+% !TeX encoding = UTF-8
+%%	- You must absolutely use unicode encoding (utf8)!
+
+\documentclass[10pt,twoside,reqno]{article}
+\raggedbottom
+
+\usepackage[bottom]{footmisc}		%% footnotes
+\setlength{\footnotemargin}{0.6em}
+
+\usepackage{blindtext}
+
+\usepackage{DemRes}							%% journal style file
+
+%\usepackage[none]{hyphenat}		%% no hyphenation [!] if style errors occur, solve with \linebreak
+\usepackage[utf8]{inputenc}			%% input-encoding: unicode
+
+\makeatletter
+\renewcommand*{\@pnumwidth}{3em} %% Width of the box for the page number in the TOC
+\setlength{\@fptop}{0pt}				 %%	Floats to the top of the page
+%\g@addto@macro\normalsize{%		 %% force equasion spacing to 10pt (font size); it can be helpful to increase the long skips to 12pt to fix spacing issues (of matrices in particular)
+%  \setlength\abovedisplayskip{10pt}
+%  \setlength\belowdisplayskip{10pt}
+%  \setlength\abovedisplayshortskip{10pt}
+%  \setlength\belowdisplayshortskip{10pt}
+%}
+\makeatother
+
+\usepackage{printlen}
+\uselengthunit{pt}
+\usepackage[hidelinks, pdftitle={\drtitleone}]{hyperref}
+
+%% inhaltsverzeichnis, überschriften
+\usepackage{titlesec}
+\titleformat{\section}[hang]{\raggedright\normalfont\bfseries\large}{\arabic{section}.}{1ex}{}
+\titleformat{\subsection}[hang]{\raggedright\normalfont\bfseries}{\arabic{section}.\arabic{subsection}}{1ex}{}
+\titleformat{\subsubsection}[hang]{\raggedright\normalfont\bfseries}{\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}{1ex}{}
+
+\bibpunct [: ] {(} {)} {;} {a} {} {,}
+
+%% insert any additional packages and commands here
+\usepackage{amsmath}
+\usepackage{adjustbox}
+\usepackage{lscape}
+\usepackage{calc}
+\usepackage{float}
+\usepackage{placeins}
+\usepackage{makecell}
+\usepackage{tabularx}
+\usepackage{siunitx}
+\sisetup{detect-all}
+\usepackage{bm}
+\usepackage{color, colortbl}
+\definecolor{Gray}{gray}{0.9}
+\usepackage{setspace}
+
+\newcommand\ddfrac[2]{\frac{\displaystyle #1}{\displaystyle #2}}
+
+%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% do not change
+\widowpenalty = 10000
+\clubpenalty = 10000
+
+\setlength{\parskip}{0ex}
+\setlength{\parindent}{.7cm}
+\setlength{\bibsep}{.18cm}
+\setlength{\belowdisplayskip}{15pt} \setlength{\belowdisplayshortskip}{10pt}
+\setlength{\abovedisplayskip}{15pt} \setlength{\abovedisplayshortskip}{10pt}
+
+
+\title{\textbf{\drtitleone}\vspace{5mm}}
+\author{
+\ifnum1=\autorzahl
+	\autorenitit
+\else
+	\ifnum2=\autorzahl
+		\autoreniitit
+	\else
+		\ifnum3=\autorzahl
+			\autoreniiitit
+		\else
+			\ifnum4=\autorzahl
+				\expandafter\autorenivtit
+			\else
+				\autorenvtit
+			\fi
+		\fi
+	\fi
+\fi
+}
+
+\makecover
+\newpage
+\pagestyle{empty}
+\renewcommand{\contentsname}{Contents}
+{\footnotesize \tableofcontents}
+\newpage
+%% until here
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%Placeholders begin with two exclamation marks "!!".
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\setcounter{page}{\drstartpage}							
+\maketitle
+\thispagestyle{plain}
+
+%%%%%%%%%%%%%%%%%%%%%%%%% ABSTRACT %%%%%%%%%%%%%%%%%%%%%%%%%
+
+\vspace*{-24pt}
+\vspace*{5mm}
+\setlength{\parskip}{0.5em}
+\section*{Abstract}
+
+% - Insert the paper’s information in the ABSTRACT:
+
+\noindent\textbf{BACKGROUND}\\
+!!Background
+\par
+\noindent\textbf{OBJECTIVE}\\
+!!Objective
+\par
+\noindent\textbf{METHODS}\\
+!!Methods
+\par
+\noindent\textbf{CONCLUSIONS}\\
+!!Conclusions
+\par
+% If the contribution splits onto the second page, please add a \pagebreak here.
+\noindent\textbf{CONTRIBUTION}\\
+!!Contribution
+ 
+\vspace*{12pt}
+
+\setlength{\parskip}{0ex}
+
+\pagestyle{fancy}
+\setcounter{footnote}{\autorzahl}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% MAIN TEXT %%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newpage % remove if abstract continues to second page
+\section{Introduction}\label{Introduction} % remember to change the label if the authors use a different one
+
+!!Ipsum
+
+% TIPS: 
+% 	- Use an en-dash (--) for all minuses, page spans, years, etc.  
+%	- Use, e.g., \cite{ }, \citep{ }, and \citeauthor{ } for in-text citations (ensure that no extra brackets are created). 
+%	- Use \% for percent symbol (unless there is a real reason for spelling it out)
+%	- Italics should not be used to emphasize portions of text.
+%		- See the "Cheat Sheet" for further information.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%% IN-TEXT TABLES & FIGURES %%%%%%%%%%%%%%%%%%%%%%%%%
+
+% NOTE! All tables and figures must be first mentioned in the text, then the imagery follows (after the full stop): 
+% - Please use \floatbarrier or [H] to ensure that all tables and figures come AFTER a paragraph is completed (i.e., not within the paragraph). 
+
+
+% - Please ensure to format all tables, figures, graphs, etc. with the appropriate caption headings and sizing. 
+%     - See the LaTeX formatting cheat sheet (points 2–3). 
+%     - If you have more than ten figures/tables, PLEASE INSERT \hspace{} (e.g., \hspace{-1em}) before the caption.
+
+% --------------------------------- TABLE TEMPLATE ---------------------------------
+
+%		\begin{table}[H]
+%		\sansmath
+%		\sffamily
+%		\captionsetup{style=CAPFIG}
+%		\caption{\label{tab:estimated-parameters}Estimated parameters and standard errors}\vspace{-4pt}
+%		\begin{scriptsize}
+%		\setlength{\tabcolsep}{4pt}
+%  	 \begin{tabular}{ldddD{.}{.}{2.5}}                        %%%% CHANGE according to your table.
+%		\hline
+%		\\[-3pt]
+%		{ }& \multicolumn{1}{c}{\textbf{XXX}} &   & \multicolumn{1}{c}{\textbf{XXX}} &  \\            %%%% DELETE if you do not require two lines for headings.
+%		\multicolumn{1}{c}{\textbf{XXXX}} & \multicolumn{1}{c}{\textbf{XXXX}} & \multicolumn{1}{c}{\textbf{XXXX}} & 		\multicolumn{1}{c}{\textbf{XXXX}} & \multicolumn{1}{c}{\textbf{XXXX}}\\
+%		\\[2pt]
+%		\hline
+%		\\[-3pt]
+% 	Cell & Cell & Cell & Cell & Cell\\[2pt]
+% 	Cell & Cell & Cell & Cell & Cell\\[2pt]
+% 	Cell & Cell & Cell & Cell & Cell\\[2pt]
+% 	Cell & Cell & Cell & Cell & Cell\\[2pt]
+% 	Cell & Cell & Cell & Cell & Cell\\[2pt]
+% 	Cell & Cell & Cell & Cell & Cell\\[2pt]
+% 	Cell & Cell & Cell & Cell & Cell\\[2pt]
+% 	Cell & Cell & Cell & Cell & Cell\\[2pt]
+% 	Cell & Cell & Cell & Cell & Cell\\
+%		\\[3pt]
+%		\hline
+%		\end{tabular}
+%		\end{scriptsize}
+%		To place a NOTE, following the table:
+%  	 \vspace{1ex} % if at least one note
+%		\small\scriptsize{\textsf{\textit{Source}: Total fertility rate (1949--2002) comes from \citet{Lu:2009} ``Sixty Years of New China Population.'' Sex ratio at birth (1960--1988) comes from \citet{Liang:1993}. Sex ratio at birth (1989--2000) comes from the China Population Statistics Yearbook.}}
+%		% notes terminate in full stop, newline only for new note type -- not per sentence
+%\end{table}
+
+
+% --------------------------------- FIGURE TEMPLATE ---------------------------------
+
+%		\begin{figure}[H]
+%		\begin{flushleft}\captionsetup{style=CAPFIG} % leave CAPFIG
+%		\caption{!!Caption} 
+%		\label{!!Label}
+%		\vspace{0em} % vspace, adjust if necessary, can be negative
+%		\includegraphics[width=0.8\textwidth]{!!PathToGraphic} % width and alignment (here \center) can be changed
+%		To place a NOTE, following the figure
+%   \vspace{1ex} % if at least one note
+%		\small\scriptsize{\textsf{\textit{Source}: Total fertility rate (1949--2002) comes from \citet{Lu:2009} ``Sixty Years of New China Population.'' Sex ratio at birth (1960--1988) comes from \citet{Liang:1993}. Sex ratio at birth (1989--2000) comes from the China Population Statistics Yearbook.}}
+%		\end{flushleft}
+%		\end{figure}
+%		\FloatBarrier (if necessary)
+
+% --------------------------------- EQUATION TEMPLATE --------------------------------- 
+
+%	\vspace{-6pt}
+%	\begin{equation}
+%	\beta^{-1}\log(c)h({c\kappa}) < e(a;1) - e(a;c) < {\beta ^{ - 1}}\log(c)h(\kappa)
+% 			- If equation is too big, use	\small or \normalsize
+%	\end{equation}
+%	\vspace{-6pt}
+
+% TIP: Use periods and commas at the end of the equation.
+
+% --------------------------------- HYPOTHESIS TEMPLATE ---------------------------------
+
+%	\vspace{10pt}
+%	\parbox{11.75}{\textit{Hypothesis 1:} Text}
+%	\vspace{10pt}
+
+% For more mathematical functions, see the cheat sheet. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%% REFERENCES %%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newpage
+\addcontentsline{toc}{section}{\numberline{}References}
+\bibliographystyle{DemRes}
+\bibliography{!!RefsFile} % bibliography file
+\nocite{*}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%% APPENDIX %%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% DELETE if you do not have an appendix.
+\clearpage
+\section*{Appendix} % sometimes different appendix names or multiple appendices may be used, change label if required
+\addcontentsline{toc}{section}{\numberline{}Appendix} % same name as above
+\setcounter{section}{0}
+\renewcommand{\thesection}{A-\arabic{section}}
+\setcounter{figure}{0}
+\renewcommand{\thefigure}{A-\arabic{figure}}
+\setcounter{table}{0}
+\renewcommand{\thetable}{A-\arabic{table}}
+
+!!Ipsum
+
+% If you have multiple sections for the Appendix, rename it the Appendices.
+
+% - You will need to change the following sections to B, C, etc. following A. For example: 
+%\renewcommand{\thesection}{B-\arabic{section}, followed by a \section*{<< the second appendix >>}
+%\setcounter{figure}{0}
+%\renewcommand{\thefigure}{B-\arabic{figure}}
+%\setcounter{table}{0}
+%\renewcommand{\thetable}{B-\arabic{table}}
+
+% NOTE! Please add \hspace { } (e.g., \hspace{-.99em}) to fix the captions of tables/figures in the Appendix.
+
+
+%%%%%%%%%%%%%%%%%%%%%% END APPENDIX %%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Ensure that there is an even number of pages. 
+\cleardoublepage
+\end{document}
+
+

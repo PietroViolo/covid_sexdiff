@@ -1,0 +1,243 @@
+\usepackage[utf8]{inputenc}
+\setcounter{page}{-1}
+
+%%%% cover page
+
+\newcommand{\drcat}{Research Article}					%% if necessary, change to 'Descriptive Finding' or 'Formal Relationship'
+\newcommand{\drdatepub}{DD MONTH YYYY}				%% change
+\newcommand{\drvolume}{45}										%% change once a new volume starts
+\newcommand{\drarticle}{XX}								%% change article number
+\newcommand{\drstartpage}{1} %% change '1'											
+\newcommand{\drtitleone}{TITLE} 							%% change
+\newcommand{\drshorttitle}{TITLESHORT}				%% only necessary if title is too long
+%\newcommand{\drtitletwo}{}
+%\newcommand{\blurb}{This article is part of the Special Collection on ``Data Visualization,'' \\organized by Guest Editors Tim Riffe, Sebastian Klüsener, and Nikola Sander.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\drpages}{\drstartpage--\pageref*{LastPage}} 
+\let\oldfootnote\footnote
+    \renewcommand{\footnote}[1]{\oldfootnote{\hspace{0.28em}#1}}
+%%%% authors
+
+\newcount\autorzahl % author number 
+\autorzahl=2%% change
+
+%%% Please leave unfilled, if this is a new submission (to keep the paper anonymous).
+
+% author 1
+\newcommand{\autoriv}{XXX} % first name
+\newcommand{\autorin}{XXXXX} % last name
+\newcommand{\affiliationi}{\hspace*{.28ex}Institute, University, City, Country} % add email here, if connected to the first author.
+
+% author 2
+\newcommand{\autoriiv}{XXX}
+\newcommand{\autoriin}{XXXXX}
+\newcommand{\affiliationii}{\hspace*{.28ex}Institute, University, City, Country. Email: \href{mailto:XXXXX}{\textcolor{blue}{XXXXX}}.}
+
+% author 3
+\newcommand{\autoriiiv}{Un}
+\newcommand{\autoriiin}{Deux}
+\newcommand{\affiliationiii}{\hspace*{.28ex}Department, University, City, Country.}
+
+% author 4
+\newcommand{\autorivv}{Uno}
+\newcommand{\autorivn}{Dos}
+\newcommand{\affiliationiv}{\hspace*{.28ex}Department, University, City, Country.}
+
+% author 5
+\newcommand{\autorvv}{En}
+\newcommand{\autorvn}{Tva}
+\newcommand{\affiliationv}{\hspace*{.28ex}Department, University, City, Country.}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% no changes necessary after this point
+
+
+\newcommand{\autorenicov}{%
+	\hypersetup{pdfauthor={\autoriv\ \autorin}}%
+	\large{\textbf{\autoriv\ \autorin}}\\%
+}
+\newcommand{\autoreniicov}{%
+	\hypersetup{pdfauthor={\autoriv\ \autorin, \autoriiv\ \autoriin}}%
+	\large{\textbf{\autoriv\ \autorin}}\\%
+	\smallskip%
+	\large{\textbf{\autoriiv\ \autoriin}}\\%
+}
+\newcommand{\autoreniiicov}{%
+	\hypersetup{pdfauthor={\autoriv\ \autorin, \autoriiv\ \autoriin, \autoriiiv\ \autoriiin}}%
+	\large{\textbf{\autoriv\ \autorin}}\\%
+	\smallskip%
+	\large{\textbf{\autoriiv\ \autoriin}}\\%
+	\smallskip%
+	\large{\textbf{\autoriiiv\ \autoriiin}}\\%
+}
+\newcommand{\autorenivcov}{%
+	\hypersetup{pdfauthor={\autoriv\ \autorin, \autoriiv\ \autoriin, \autoriiiv\ \autoriiin, \autorivv\ \autorivn}}%
+		\large{\textbf{\autoriv\ \autorin}}\\%
+	\smallskip%
+		\large{\textbf{\autoriiv\ \autoriin}}\\%
+	\smallskip%
+		\large{\textbf{\autoriiiv\ \autoriiin}}\\%
+	\smallskip%
+		\large{\textbf{\autorivv\ \autorivn}}\\%
+}
+\newcommand{\autorenvcov}{%
+	\hypersetup{pdfauthor={\autoriv\ \autorin, \autoriiv\ \autoriin, \autoriiiv\ \autoriiin, \autorivv\ \autorivn, \autorvv\ \autorvn}}%
+	\begin{tabular}{@{}p{4.1cm}lp{4.1cm}}%
+		\large{\textbf{\autoriv\ \autorin}}&&\large{\textbf{\autoriiv\ \autoriin}}\\%
+			&&\\%
+		\large{\textbf{\autoriiiv\ \autoriiin}}&&\large{\textbf{\autorivv\ \autorivn}}\\%
+			&&\\
+		\large{\textbf{\autorvv\ \autorvn}}&&\\%
+			&&%
+	\end{tabular}%
+}
+
+\newcommand{\autorenitit}{%
+	\textbf{{\autoriv\ \autorin}}\thanks{\affiliationi}\vspace*{4mm}%
+}
+\newcommand{\autoreniitit}{%
+	\textbf{{\autoriv\ \autorin}}\thanks{\affiliationi}\\[2mm]%
+	\textbf{{\autoriiv\ \autoriin}}\thanks{\affiliationii}\vspace*{4mm}%
+}
+\newcommand{\autoreniiitit}{%
+	\textbf{{\autoriv\ \autorin}}\thanks{\affiliationi}\\[2mm]%
+	\textbf{{\autoriiv\ \autoriin}}\thanks{\affiliationii}\\[2mm]%
+	\textbf{{\autoriiiv\ \autoriiin}}\thanks{\affiliationiii}\vspace*{4mm}%
+}
+\newcommand{\autorenivtit}{%
+	\textbf{{\autoriv\ \autorin}}\thanks{\affiliationi}\\[2mm]%
+	\textbf{{\autoriiv\ \autoriin}}\thanks{\affiliationii}\\[2mm]%
+	\textbf{{\autoriiiv\ \autoriiin}}\thanks{\affiliationiii}\\[2mm]%
+	\textbf{{\autorivv\ \autorivn}}\thanks{\affiliationiv}\vspace*{4mm}%
+}
+\newcommand{\autorenvtit}{%
+	\textbf{{\autoriv\ \autorin}}\thanks{\affiliationi}\\[2mm]%
+	\textbf{{\autoriiv\ \autoriin}}\thanks{\affiliationii}\\[2mm]%
+	\textbf{{\autoriiiv\ \autoriiin}}\thanks{\affiliationiii}\\[2mm]%
+	\textbf{{\autorivv\ \autorivn}}\thanks{\affiliationiv}\\[2mm]%
+	\textbf{{\autorvv\ \autorvn}}\thanks{\affiliationv}\vspace*{4mm}%
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%	Do not edit beyond this point!	%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% für die Liste der Autoren:		
+\newcommand{\drcvrlistauthors}{
+\ifnum1=\autorzahl
+	\autorenicov
+\else
+	\ifnum2=\autorzahl
+		\autoreniicov
+	\else
+		\ifnum3=\autorzahl
+			\autoreniiicov
+		\else
+			\ifnum4=\autorzahl
+				\autorenivcov
+			\else
+				\autorenvcov
+			\fi
+		\fi
+	\fi
+\fi
+}
+
+
+
+% für die Copyright-Zeile:		
+\newcommand{\drcvrcrauthors}{
+\ifnum1=\autorzahl
+	\copyright\ \normalsize{\emph{\the\year\ \autoriv\ \autorin.}}
+\else
+	\ifnum2=\autorzahl
+		\copyright\ \normalsize{\emph{\the\year\ \autoriv\ \autorin\ \&\ \autoriiv\ \autoriin.}}
+	\else
+		\ifnum3=\autorzahl
+			\copyright\ \normalsize{\emph{\the\year\ \autoriv\ \autorin, \autoriiv\ \autoriin\ \&\ \autoriiiv\ \autoriiin.}}
+		\else
+			\copyright\ \normalsize{\emph{\the\year\ \autoriv\ \autorin, \autoriiv\ \autoriin, \autoriiiv\ \autoriiin\ \&\ \autorivv\ \autorivn.}}
+		\fi
+	\fi
+\fi
+}
+\newlength{\copyrightlaenge}
+\settowidth{\copyrightlaenge}{\drcvrcrauthors}
+\ifdim9.75cm<\copyrightlaenge
+	\renewcommand{\drcvrcrauthors}{
+		\ifnum1=\autorzahl
+			\copyright\ \normalsize{\emph{\the\year\ \autorin.}}
+		\else
+			\ifnum2=\autorzahl
+				\copyright\ \normalsize{\emph{\the\year\ \autorin\ \&\ \autoriin.}}
+			\else
+				\ifnum3=\autorzahl
+					\copyright\ \normalsize{\emph{\the\year\ \autorin, \autoriin\ \&\ \autoriiin.}}
+				\else
+					\ifnum4=\autorzahl
+						\copyright\ \normalsize{\emph{\the\year\ \autorin, \autoriin, \autoriiin\ \&\ \autorivn.}}
+					\else 
+						\copyright\ \normalsize{\emph{\the\year\ \autorin, \autoriin, \autoriiin, \autorivn\, \&\ \autorvn.}}
+					\fi
+				\fi
+			\fi
+		\fi
+	}
+\else
+\fi
+\settowidth{\copyrightlaenge}{\drcvrcrauthors}
+\ifdim9.75cm<\copyrightlaenge
+	\renewcommand{\drcvrcrauthors}{
+			\copyright\ \normalsize{\emph{\the\year\ \autorin\ et al.}}
+	}
+\else
+\fi
+
+
+
+\newcommand{\makecover}{\begin{titlepage}%
+	\begin{center}
+		\includegraphics[width=11.5cm]{Logo_new.pdf}
+		\smallskip
+		
+		\rule{12cm}{1mm}\\
+		\bigskip
+		\bigskip
+		\bigskip
+		\begin{tabular}{p{8.5cm}}
+			\large{\textbf{\emph{DEMOGRAPHIC RESEARCH}}}\\
+			\bigskip
+			\large{\textbf{VOLUME \drvolume, ARTICLE \drarticle, PAGES \drpages}}\\
+			\large{\textbf{PUBLISHED \MakeUppercase{\drdatepub}}}\\
+			\normalsize{\href{http://www.demographic-research.org/Volumes/Vol\drvolume/\drarticle/}{http://www.demographic-research.org/Volumes/Vol\drvolume/\drarticle/}}\\
+			\normalsize{DOI: 10.4054/DemRes.\the\year.\drvolume.\drarticle}\\
+			\medskip
+			\large{\emph{\drcat}}\\
+			\bigskip
+			\begin{flushleft}
+				\large{\textbf{{\raggedright \drtitleone}}}
+			\end{flushleft}
+			\\[-0.4cm]
+			%\large{\textbf{\drtitletwo}}\\[0.1cm]
+			%\large{\textbf{\drsubtitleone}}\\%[0.1cm]
+			%\large{\textbf{\drsubtitletwo}}\\
+			\bigskip
+			\drcvrlistauthors
+		\end{tabular}
+		\vfill
+		\begin{tabular}{p{8.5cm}}
+			\begin{flushleft}\footnotesize{\@ifundefined{blurb}{}{\blurb}}
+			\end{flushleft}\\
+			\drcvrcrauthors\\
+			%\underline{\hspace*{4in}}
+			\smallskip
+			\begin{flushleft}\footnotesize{\emph{This open-access work is published under the terms of the Creative Commons Attribution 3.0 Germany (CC BY 3.0 DE), which permits use, reproduction, and distribution in any medium, provided the original author(s) and source are given credit.\\ See 
+			\href{https://creativecommons.org/licenses/by/3.0/de/legalcode}{https://creativecommons.org/licenses/by/3.0/de/legalcode}}}
+			\end{flushleft}
+		\end{tabular}
+	\end{center}
+\end{titlepage}%
+}

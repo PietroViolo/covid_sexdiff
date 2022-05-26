@@ -1,0 +1,4 @@
+\babel@toc {english}{}
+\contentsline {section}{\numberline {1}Introduction}{2}{section.1}% 
+\contentsline {section}{\hbox to\@tempdima {\hfil }References}{3}{table.caption.1}% 
+\contentsline {section}{\hbox to\@tempdima {\hfil }Appendix}{4}{table.caption.1}% 

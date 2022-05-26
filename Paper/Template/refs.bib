@@ -1,0 +1,104 @@
+%% Praelegomena %%
+%% PLEASE MAKE SURE THAT YOU USE UNICODE ENCODING IN ALL YOUR TEX-FILES (UTF-8)!!!
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% tipps
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%% authors
+% ~ must be separated by "and" (no matter how many there are)
+% ~ no {{double brackets}}
+% ~ all of the "Firstname Lastname" "Lastname, Firstname" and "Lastname, F." formats can be used, but to prevent issues in the alphabetical sorting in the final document, only one of them should be used consistently
+
+%%%%%%% titles
+% ~ automatically lowercase except for the first letter, all other capitalization will be ignored
+% ~ to override this rule, use {{Double Brackets}} around the title or brackets around the {L}etter to be capitalized
+
+%%%%%%% misc
+% ~ non-breaking space is, as in the normal LaTeX document, "~"
+% ~ if one journal is cited many times and you don't want to keep typing the whole title, choose an abbreviation and use this function
+@string{jot = "Journal of Trees"}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% templates
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% journal articles
+@ARTICLE{birchoak07,
+  author =       {Birch, A. and Oak, B.},
+  year =         {2007},
+  title =        {Testing {LaTeX}},
+  journal =      {Journal of Trees},
+  volume =       {1},
+  number =       {2},
+  pages =        {1--23},
+  note = 				 {\href{http://doi.org/10.1234.123456789}{\textcolor{blue}{doi:10.\allowbreak{}1234.\allowbreak{}123456789}}},
+% OR 
+% doi = { }
+}
+
+% books
+@BOOK{maple08,
+  author =       {Maple, C.},
+  year =         {2008},
+  title =        {Title:\ This is a book},
+  publisher =    {Utopia:\ Verlag},
+}
+
+% chapters in books
+@incollection{spruce09,
+  author  =      {Spruce, D.},
+  year =         {2009},
+  title =        {Chapter title},
+  editor =       {Magnolia, E. and Rose, F.},
+  booktitle =    {Book title},
+  publisher =    {Atlantis:\ Xi},
+  pages =        {1--9},
+}
+
+% research reports, working papers
+@REPORT{pine10,
+  author =       {Pine, G.},
+  year =         {2010},
+  title =        {Report title},
+  institution =  {Place: Institution (Working Paper No. 12345)},
+}
+
+% doctoral theses
+@MISC{olive11,
+  author =       {Olive, H.},
+  year =         {2011},
+  title =        {Thesis title [{PhD Thesis}]},
+  note =         {Place: University},
+}
+
+% websites, databases, etc.
+@MISC{walnut12,
+  author =       {Walnut, I.},
+  year =         {2012},
+  title =        {Website title [electronic resource]},
+  note =         {Atlantis: Institution. \href{http://www.url.com}{\textcolor{blue}{url.com}}},
+}
+
+% conference papers
+@CONF{willow14,
+  author =       {Willow, W.},
+  year =         {2014},
+  title =        {Paper title},
+  note =         {Paper presented at Conference, Location, Country, Month Day, Year},
+								 %% e.g., Paper presented at the Annual Tree Conference, Thousand Oaks, USA, November 30--December 2, 2014
+}
+
+% unpublished manuscripts
+@MISC{oak13,
+  author =       {Oak, J.},
+  year =         {2013},
+  title =        {Unpublished title [unpublished manuscript]},
+  note =         {Place: Institution. \href{http://www.url.com}{\textcolor{blue}{url.com}}},
+}
+
+%% be sure to delete the empty templates before loading the .tex document
+%% :)

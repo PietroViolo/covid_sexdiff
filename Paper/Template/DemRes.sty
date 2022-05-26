@@ -1,0 +1,241 @@
+%% style for Demographic Research Online Journal
+%% include as \usepackage{demres} in Latex papers
+%% based on article style.
+%%
+%% this version 
+%% by Jana Korsinek, 26 March 2009
+%% modified by Tom Theile & Hailey Rheault 13 Sept 2021
+%%
+%% set margins, line spacing, etc., using
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{DemRes}[2014/4/28 v1.0]
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%	DO NOT EDIT BEYOND THIS POINT!!!	%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{cover}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+
+\usepackage{natbib}
+	\setcitestyle{aysep={}}
+\newcommand{\doi}[1]{\href{http://www.dx.doi.org/#1}{\textcolor{blue}{doi:#1}}}
+
+\usepackage{ifthen}
+\usepackage{longtable}
+\usepackage{rotating}
+\usepackage{multirow}
+
+%%	Mathemodus in serifenloser Schrift
+%		an:		\sansmath
+%		aus:	\unsansmath
+\usepackage[EULERGREEK,T1]{sansmath}
+
+
+%%	Für die TOC-Einträge ohne Punkt:
+%\makeatletter
+\renewcommand{\thesection}{\arabic{section}}
+\renewcommand{\thesubsection}{\thesection.\@arabic\c@subsection}
+
+
+\usepackage{dcolumn}
+%Spalte d{4.2}: 4 Vorkommastellen, 2 Nachkommastellen, zentriert, Ausrichtung am Dezimalpunkt
+%\newcolumntype{d}[1]{%
+%>{\DC@{.}{.}{#1}}c<{\DC@end}%
+%}
+\newcolumntype{d}{D{.}{.}{9.9}}
+
+\usepackage{lastpage}
+\usepackage{tabularx}
+\usepackage{color}
+\usepackage[ngerman,english]{babel}
+
+\RequirePackage{geometry}
+\geometry{
+paperheight=22cm,
+paperwidth=17cm,
+top=2.54cm,
+bottom=2.54cm,
+inner=2cm,
+outer=2.54cm,
+footskip=11mm,
+headheight=1cm,
+headsep=0.75cm,
+showframe=false
+}
+
+%%	set fonts to times roman
+\usepackage{times}
+
+
+%%	Damit die Captions nach der Vorlage aussehen:
+\usepackage[hang]{caption}
+\DeclareCaptionFormat{myformat}{#1#2\hspace{1cm}#3}
+\DeclareCaptionFont{Bold}{\bfseries}
+\DeclareCaptionStyle{CAPFIG}{style=default,
+font={normalsize,Bold}, labelfont=Bold, justification=raggedright,
+format=myformat, singlelinecheck=false, indention=2.48cm}
+\DeclareCaptionStyle{CAPTAB}{style=default,
+font={normalsize,Bold}, labelfont=Bold, justification=raggedright,
+format=myformat, singlelinecheck=false, indention=2.32cm}
+
+
+%%	Damit die Überschriften im TOC nach der Vorlage sind:
+\renewcommand*\l@section[2]{%
+  \ifnum \c@tocdepth >\z@
+    \addpenalty\@secpenalty
+    \addvspace{1.0em \@plus\p@}%
+    %\setlength\@tempdima{1.5em}%
+    \setlength\@tempdima{4em}%
+    \begingroup
+      \parindent \z@ \rightskip \@pnumwidth
+      \parfillskip -\@pnumwidth
+      \leavevmode %\bfseries
+      \advance\leftskip\@tempdima
+      \hskip -\leftskip
+      #1\nobreak\hfill \nobreak\hb@xt@\@pnumwidth{\hss #2}\par
+    \endgroup
+  \fi}
+
+\renewcommand*\l@subsection[2]{%
+  \ifnum \c@tocdepth >\z@
+    \addpenalty\@secpenalty
+    %\addvspace{1.0em \@plus\p@}%
+    %\setlength\@tempdima{1.5em}%
+    \setlength\@tempdima{4em}%
+    \begingroup
+      \parindent \z@ \rightskip \@pnumwidth
+      \parfillskip -\@pnumwidth
+      \leavevmode %\bfseries
+      \advance\leftskip\@tempdima
+      \hskip -\leftskip
+      #1\nobreak\hfill \nobreak\hb@xt@\@pnumwidth{\hss #2}\par
+    \endgroup
+  \fi}
+
+\renewcommand*\l@subsubsection[2]{%
+  \ifnum \c@tocdepth >\z@
+    \addpenalty\@secpenalty
+    %\addvspace{1.0em \@plus\p@}%
+    %\setlength\@tempdima{1.5em}%
+    \setlength\@tempdima{4em}%
+    \begingroup
+      \parindent \z@ \rightskip \@pnumwidth
+      \parfillskip -\@pnumwidth
+      \leavevmode %\bfseries
+      \advance\leftskip\@tempdima
+      \hskip -\leftskip
+      #1\nobreak\hfill \nobreak\hb@xt@\@pnumwidth{\hss #2}\par
+    \endgroup
+  \fi}
+
+
+
+% für die Kopfzeile -- Autoren und (Kurz-)Titel:
+\newcommand{\autor}{}
+\newcommand{\titel}{\drtitleone}
+
+\ifnum1=\autorzahl
+	\renewcommand{\autor}{\autorin}
+\else
+	\ifnum2=\autorzahl
+		\renewcommand{\autor}{\autorin\ \&\ \autoriin}
+	\else
+		\ifnum3=\autorzahl
+			\renewcommand{\autor}{\autorin, \autoriin\ \&\ \autoriiin}
+		\else
+			\renewcommand{\autor}{\autorin\ et al.}
+		\fi
+	\fi
+\fi
+\renewcommand{\titel}{\drtitleone}
+\newcommand{\kurztitel}{\drshorttitle}
+\newlength{\headlaenge} 
+\settowidth{\headlaenge}{{\footnotesize\emph{\autor}: \titel}}
+\newlength{\testlaenge} 
+\settowidth{\testlaenge}{\footnotesize\emph{\autor}: \drtitleone}
+\ifdim410pt<\testlaenge
+	\renewcommand{\titel}{\kurztitel}
+\else
+\fi
+
+
+
+
+% set first page using drtitling.sty (modified from titeling.sty)
+% and renew abstract environment
+% works with default or notitlepage option
+\usepackage{drtitling}
+\renewenvironment{abstract}{\noindent\large{\textbf{Abstract}}\vskip 1em\normalsize\par}{\clearpage}
+
+% set footers to DR style
+% the volume number and publicaton date
+% are set in the document preamble
+% with renewcommands
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\newcommand{\drdate}{}
+
+\pagestyle{empty} \markboth{}{}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+
+\fancyhf{}
+\def\drfootersize{\footnotesize}
+\renewcommand{\headrulewidth}{0pt}
+\fancyhead[LE]{\footnotesize\emph{\autor}: \titel} \chead{}
+\fancyhead[RO]{\footnotesize \emph{Demographic Research}: Volume \drvolume, Article
+\drarticle} \fancyfoot[RO,LE]{\drfootersize \arabic{page}} \cfoot{}
+\fancyfoot[LO,RE]{\drfootersize
+\href{http://www.demographic-research.org}{http://www.demographic-research.org}}
+\fancypagestyle{plain}{%
+\fancyhead[LO]{}
+\fancyhead[RO]{}
+\fancyhead[CO]{\footnotesize \emph{Demographic Research}: Volume \drvolume, Article \drarticle\\[1mm] 
+\emph{\drcat}} 
+\fancyfoot[RO,LE]{\drfootersize \arabic{page}} \cfoot{}
+\fancyfoot[LO,RE]{\drfootersize
+\href{http://www.demographic-research.org}{http://www.demographic-research.org}}} 
+
+
+\renewcommand\appendixname{\footnotesize Appendix}
+\renewcommand\abstractname{\large Abstract}
+\renewcommand\section{\@startsection {section}{1}{\z@}%
+                                   {-24pt}%
+                                   {2.3ex \@plus.2ex}%
+                                   {\normalfont\large\bfseries}}
+\renewcommand\subsection{\@startsection{subsection}{2}{\z@}%
+                                     {-24pt}%
+                                     {1.5ex \@plus .2ex}%
+                                     {\normalfont\normalsize\bfseries}}
+
+% use drnotes.sty package (modified from endnotes) in order
+% that the Latex \footnote command produces endnotes in DR
+% style
+
+% modified by marko
+%\usepackage{drnotes}
+%\let\footnote=\endnote
+
+
+% HPK, 24 Apr 02
+% modified list elements in order to create compact lists with less spacing
+%\labelsep=1.1em         % increase distance between item & text
+\topsep=0pt             % no extra skip above list in paragraph
+\partopsep=0pt          % no extra skip above list starting par.
+\itemsep=0pt            % no extra space between items
+\parsep=.9\parskip      % between paragraphs in items
+\def\@listI{%
+  \leftmargin\leftmargini } \let\@listi\@listI \@listi
+\def\@listii{%
+    \leftmargin\leftmarginii
+    \labelwidth\leftmarginii  \advance \labelwidth-\labelsep
+    }
+\def\@listiii{%
+    \leftmargin\leftmarginiii
+    \labelwidth\leftmarginiii  \advance \labelwidth-\labelsep
+    }
+\makeatother
