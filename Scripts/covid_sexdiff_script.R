@@ -118,13 +118,13 @@ excess_male_mort %>% filter(!(is.infinite(excess_male)),
                                        "40-44",
                                        "45-49",
                                        "50-54",
-                                       Age == 55 ~ "55-59",
-                                       Age == 60 ~ "60-64",
-                                       Age == 65 ~ "65-69",
-                                       Age == 70 ~ "70-74",
-                                       Age == 75 ~ "75-79",
-                                       Age == 80 ~ "80-84",
-                                       Age == 85 ~ "85 +")) %>% na.omit() %>% 
+                                       "55-59",
+                                       "60-64",
+                                       "65-69",
+                                       "70-74",
+                                       "75-79",
+                                       "80-84",
+                                       "85 +"))%>% 
   ggplot(aes(x = date, y = excess_male, color = Age)) +
   geom_line() + 
   scale_y_log10(limits = c(0.5,4))
@@ -160,6 +160,67 @@ for(state in states){
   dev.off()
   
 }
+
+
+
+#'* Median mortality ratios on the map for each age group*
+
+#devtools::install_github("UrbanInstitute/urbnmapr")
+library(urbnmapr)
+
+
+median_mort <- excess_male_mort %>% summarise(median = median(excess_male, na.rm = T))
+
+ages <-          c("30-34",
+                   "35-39",
+                   "40-44",
+                   "45-49",
+                   "50-54",
+                   "55-59",
+                   "60-64",
+                   "65-69",
+                   "70-74",
+                   "75-79",
+                   "80-84",
+                   "85 +")
+
+median_mort <- median_mort %>% filter(Age %in% ages) %>% 
+  pivot_wider(names_from = Age, values_from = median) %>% 
+  rename(state_name = Region)
+
+
+median_mort <- left_join(median_mort,states, by = 'state_name')
+
+for(age.group in ages){
+  
+  png(file = paste("./Graphs/Maps/",age.group,"_map",sep = ""), res = 300, width = 4400, height = 2600)
+  
+  print(ggplot(data = median_mort,
+         aes(x = long, y = lat, group = group, fill = get(age.group))) +
+    geom_polygon() +
+    ggtitle(paste("Median mortality ratio for COVID-19 for the ",age.group," age group", sep = ""))+
+    coord_map(projection = "albers", lat = 45, lat1 = 55) +
+    theme(legend.position="bottom",
+          axis.line=element_blank(),
+          axis.text=element_blank(),
+          axis.ticks=element_blank(),
+          axis.title=element_blank(),
+          plot.background = element_rect(fill = "#f5f5f2", color = NA),
+          panel.background = element_rect(fill = "#f5f5f2", color = NA), 
+          legend.background = element_rect(fill = "#f5f5f2", color = NA),
+          panel.border=element_blank(),
+          panel.grid=element_blank(),
+          plot.title = element_text(size= 18, hjust=0.5, color = "#4e4d47", margin = margin(b = -0.1, t = 0.4, l = 2, unit = "cm"))) +
+    scale_fill_continuous_diverging(trans = "log",
+                                    breaks = c(0.5,1,2,4),
+                                    limits = c(0.5,4),
+                                    palette = "Purple-Green",
+                                    name = "COVID-19 mortality ratio"))
+  dev.off()
+      
+}
+
+
 
 
 
