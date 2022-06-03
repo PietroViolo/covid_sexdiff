@@ -16,6 +16,7 @@ library(remotes)
 library(lubridate)
 library(viridis)
 library(colorspace)
+library(ggridges)
 
 # Data
 load("./Data/df_first_month.RData")
@@ -28,43 +29,42 @@ source("./Scripts/mortality_functions.R")
 
 # Calculate numbers of deaths that have occurred during the month
 
-df_monthly_deaths <- joined %>% group_by(Region, Sex, Age) %>% 
-  mutate(Deaths_per_month = dplyr::lead(Deaths) - Deaths,
-         Deaths_per_month_mono = ifelse(c(0,diff(Deaths_mono))<0,0, diff(Deaths_mono))) %>% 
-  na.omit()
+df_monthly_deaths <- joined %>% 
+  group_by(Region, Sex, Age) %>% 
+  mutate(Deaths_per_month = dplyr::lead(Deaths) - Deaths, # Calculate number of deaths per month
+         Deaths_per_month_mono = ifelse(c(0,diff(Deaths_mono))<0,0, diff(Deaths_mono)), # Same calculation, but for monotonic splines
+         Region = ifelse(Region=="All", "United States", Region))  #Change "All" name to allow joining
+  
 
 
 # Mortality rate : attach population
 df_mort <- mortality_function(df_monthly_deaths)
 
-# Negative means 0 deaths
+# Negative deaths are neglible, we can round to 0
 
 df_mort <- df_mort %>% mutate(Deaths_per_month = ifelse(Deaths_per_month <= 0, 0, Deaths_per_month),
-                   Deaths_per_month_mono = ifelse(Deaths_per_month_mono <= 0, 0, Deaths_per_month_mono))
-
-
-df_mort <- df_mort %>% mutate(monthly_mort_rate = Deaths_per_month/(Pop/12),
-                              monthly_mono_mort_rate = Deaths_per_month_mono/(Pop/12))
+                   Deaths_per_month_mono = ifelse(Deaths_per_month_mono <= 0, 0, Deaths_per_month_mono)) %>% 
+  mutate(monthly_mort_rate = Deaths_per_month/(Pop/12), # Deaths divided by estimated monthly population is the monthly mortality rate
+         monthly_mono_mort_rate = Deaths_per_month_mono/(Pop/12))
 
 # pivot wider for males and females on the same line to calculate
 # male-excess mortality
 
 excess_male_mort <- pivot_wider(df_mort %>%  select(Region, Sex, Age, date, monthly_mort_rate), 
-            names_from = Sex, values_from = monthly_mort_rate)
-
-excess_male_mort <- excess_male_mort %>% mutate(excess_male = m/f)
+            names_from = Sex, values_from = monthly_mort_rate) %>% mutate(excess_male = m/f)
 
 
 # male-excess mortality with mono deaths
 
-excess_male_mort <- pivot_wider(df_mort %>%  select(Region, Sex, Age, date, monthly_mono_mort_rate), 
-                                names_from = Sex, values_from = monthly_mono_mort_rate)
+excess_male_mort_mono <- pivot_wider(df_mort %>%  select(Region, Sex, Age, date, monthly_mono_mort_rate), 
+                                names_from = Sex, values_from = monthly_mono_mort_rate) %>% mutate(excess_male = m/f)
 
-excess_male_mort <- excess_male_mort %>% mutate(excess_male = m/f)
 
-excess_male_mort %>% ggplot(aes(x = excess_male, color = as.character(Age))) + 
-  geom_histogram(binwidth = 0.1, fill = "white", position = "dodge") + 
-  xlim(c(0,7)) 
+
+#'* GGRidges, for US as a whole *
+
+excess_male_mort %>% filter(Region == "United States") %>% 
+  
 
 
 
