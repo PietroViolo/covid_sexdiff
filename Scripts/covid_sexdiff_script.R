@@ -63,7 +63,43 @@ excess_male_mort_mono <- pivot_wider(df_mort %>%  select(Region, Sex, Age, date,
 
 #'* GGRidges, for US as a whole *
 
-excess_male_mort %>% filter(Region == "United States") %>% 
+excess_male_mort <- excess_male_mort %>%              # Change age groups id
+  mutate(Age = case_when(Age == 0 ~ "0-4",
+                         Age == 5 ~ "5-9",
+                         Age == 10 ~ "10-14",
+                         Age == 15 ~ "15-19",
+                         Age == 20 ~ "20-24",
+                         Age == 25 ~ "25-29",
+                         Age == 30 ~ "30-34",
+                         Age == 35 ~ "35-39",
+                         Age == 40 ~ "40-44",
+                         Age == 45 ~ "45-49",
+                         Age == 50 ~ "50-54",
+                         Age == 55 ~ "55-59",
+                         Age == 60 ~ "60-64",
+                         Age == 65 ~ "65-69",
+                         Age == 70 ~ "70-74",
+                         Age == 75 ~ "75-79",
+                         Age == 80 ~ "80-84",
+                         Age == 85 ~ "85 +"))
+
+order <- excess_male_mort %>% pull(Age) %>% unique()
+
+excess_male_mort <- excess_male_mort %>% mutate(Age = factor(Age, levels = order))
+
+
+excess_male_mort %>% # Ridge lines plot
+  filter(Region == "United States") %>% ggplot(aes( x = excess_male, y = Age, fill = Region))+ 
+  geom_density_ridges(alpha = 0.6,
+                      quantile_lines = TRUE,
+                      quantile_fun = function(x,...)mean(x))+
+  theme_ridges(font_size = 12, grid = TRUE) +
+  theme_fivethirtyeight() + 
+  xlim(c(0.5,4)) + 
+  labs (title = "Male-to-female ratios of COVID-19 for the United States",
+                           x = "Male-to-female mortality ratio",
+                           y = "Age groups") + 
+  geom_vline(xintercept = 1, color = "white")
   
 
 
