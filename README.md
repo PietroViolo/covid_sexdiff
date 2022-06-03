@@ -13,3 +13,39 @@ First, with linear-interpolated deaths:
 Second, with monotonic splines:
 
 ![Heatmap 1](https://github.com/PietroViolo/covid_sexdiff/blob/main/Graphs/Texas_excess.png)
+
+## Other types of graphs
+
+![GGRidges](https://github.com/PietroViolo/covid_sexdiff/blob/main/Graphs/GGRidges/USA_ages.png)
+
+![USA_trends](https://github.com/PietroViolo/covid_sexdiff/blob/main/Graphs/Trends/USA_trends.png)
+
+## Maps
+
+
+![USA_trends](https://github.com/PietroViolo/covid_sexdiff/blob/main/Graphs/Maps/30-34_map.png)
+
+![USA_trends](https://github.com/PietroViolo/covid_sexdiff/blob/main/Graphs/Maps/35-39_map.png)
+
+![USA_trends](https://github.com/PietroViolo/covid_sexdiff/blob/main/Graphs/Maps/40-44_map.png)
+
+![USA_trends](https://github.com/PietroViolo/covid_sexdiff/blob/main/Graphs/Maps/45-49_map.png)
+
+![USA_trends](https://github.com/PietroViolo/covid_sexdiff/blob/main/Graphs/Maps/50-54_map.png)
+
+![USA_trends](https://github.com/PietroViolo/covid_sexdiff/blob/main/Graphs/Maps/55-59_map.png)
+
+![USA_trends](https://github.com/PietroViolo/covid_sexdiff/blob/main/Graphs/Maps/60-64_map.png)
+
+![USA_trends](https://github.com/PietroViolo/covid_sexdiff/blob/main/Graphs/Maps/65-69_map.png)
+
+![USA_trends](https://github.com/PietroViolo/covid_sexdiff/blob/main/Graphs/Maps/70-74_map.png)
+
+![USA_trends](https://github.com/PietroViolo/covid_sexdiff/blob/main/Graphs/Maps/75-79_map.png)
+
+![USA_trends](https://github.com/PietroViolo/covid_sexdiff/blob/main/Graphs/Maps/80-84_map.png)
+
+![USA_trends](https://github.com/PietroViolo/covid_sexdiff/blob/main/Graphs/Maps/85%20%2B_map.png)
+
+
+
