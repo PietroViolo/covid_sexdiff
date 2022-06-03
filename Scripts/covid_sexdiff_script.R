@@ -103,6 +103,31 @@ excess_male_mort %>% # Ridge lines plot
   
 
 
+#'* Evolution of mortality ratio, for US as a whole *
+
+excess_male_mort %>% filter(!(is.infinite(excess_male)),
+                            Region == "United States") %>% na.omit() %>% 
+  ggplot(aes(x = date, y = excess_male, color = Age)) +
+  geom_line() + 
+  scale_y_log10(limits = c(0.5,4))
+
+excess_male_mort %>% filter(!(is.infinite(excess_male)),
+                            Region == "United States",
+                            Age %in% c("30-34",
+                                       "35-39",
+                                       "40-44",
+                                       "45-49",
+                                       "50-54",
+                                       Age == 55 ~ "55-59",
+                                       Age == 60 ~ "60-64",
+                                       Age == 65 ~ "65-69",
+                                       Age == 70 ~ "70-74",
+                                       Age == 75 ~ "75-79",
+                                       Age == 80 ~ "80-84",
+                                       Age == 85 ~ "85 +")) %>% na.omit() %>% 
+  ggplot(aes(x = date, y = excess_male, color = Age)) +
+  geom_line() + 
+  scale_y_log10(limits = c(0.5,4))
 
 
 #'* Lexis surfaces of mortality ratio *
