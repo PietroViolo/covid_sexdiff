@@ -63,6 +63,8 @@ excess_male_mort_mono <- pivot_wider(df_mort %>%  select(Region, Sex, Age, date,
 
 #'* GGRidges, for US as a whole *
 
+
+
 excess_male_mort <- excess_male_mort %>%              # Change age groups id
   mutate(Age = case_when(Age == 0 ~ "0-4",
                          Age == 5 ~ "5-9",
@@ -88,6 +90,8 @@ order <- excess_male_mort %>% pull(Age) %>% unique()
 excess_male_mort <- excess_male_mort %>% mutate(Age = factor(Age, levels = order))
 
 
+png(file = paste("./Graphs/GGridges/USA_ages.png"), res = 300, width = 4400, height = 3500)
+
 excess_male_mort %>% # Ridge lines plot
   filter(Region == "United States") %>% ggplot(aes( x = excess_male, y = Age, fill = Region))+ 
   geom_density_ridges(alpha = 0.6,
@@ -100,10 +104,14 @@ excess_male_mort %>% # Ridge lines plot
                            x = "Male-to-female mortality ratio",
                            y = "Age groups") + 
   geom_vline(xintercept = 1, color = "white")
+
+dev.off()
   
 
 
 #'* Evolution of mortality ratio, for US as a whole *
+
+png(file = paste("./Graphs/Trends/USA_trends.png"), res = 300, width = 4400, height = 3500)
 
 excess_male_mort %>% filter(!(is.infinite(excess_male)),
                             Region == "United States") %>% na.omit() %>% 
@@ -128,6 +136,8 @@ excess_male_mort %>% filter(!(is.infinite(excess_male)),
   ggplot(aes(x = date, y = excess_male, color = Age)) +
   geom_line() + 
   scale_y_log10(limits = c(0.5,4))
+
+dev.off()
 
 
 #'* Lexis surfaces of mortality ratio *
@@ -193,7 +203,7 @@ median_mort <- left_join(median_mort,states, by = 'state_name')
 
 for(age.group in ages){
   
-  png(file = paste("./Graphs/Maps/",age.group,"_map",sep = ""), res = 300, width = 4400, height = 2600)
+  png(file = paste("./Graphs/Maps/",age.group,"_map.png",sep = ""), res = 300, width = 4400, height = 2600)
   
   print(ggplot(data = median_mort,
          aes(x = long, y = lat, group = group, fill = get(age.group))) +
