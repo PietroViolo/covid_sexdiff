@@ -31,7 +31,7 @@ source("./Scripts/mortality_functions.R")
 
 df_monthly_deaths <- joined %>% 
   group_by(Region, Sex, Age) %>% 
-  mutate(Deaths_per_month = dplyr::lead(Deaths) - Deaths, # Calculate number of deaths per month
+  mutate(Deaths_per_month = dplyr::lead(Deaths_linint) - Deaths_linint, # Calculate number of deaths per month
          Deaths_per_month_mono = ifelse(c(0,diff(Deaths_mono))<0,0, diff(Deaths_mono)), # Same calculation, but for monotonic splines
          Region = ifelse(Region=="All", "United States", Region))  #Change "All" name to allow joining
   
@@ -50,13 +50,13 @@ df_mort <- df_mort %>% mutate(Deaths_per_month = ifelse(Deaths_per_month <= 0, 0
 # pivot wider for males and females on the same line to calculate
 # male-excess mortality
 
-excess_male_mort <- pivot_wider(df_mort %>%  select(Region, Sex, Age, date, monthly_mort_rate), 
+excess_male_mort <- pivot_wider(df_mort %>%  select(Region, Sex, Age, Date, monthly_mort_rate), 
             names_from = Sex, values_from = monthly_mort_rate) %>% mutate(excess_male = m/f)
 
 
 # male-excess mortality with mono deaths
 
-excess_male_mort_mono <- pivot_wider(df_mort %>%  select(Region, Sex, Age, date, monthly_mono_mort_rate), 
+excess_male_mort_mono <- pivot_wider(df_mort %>%  select(Region, Sex, Age, Date, monthly_mono_mort_rate), 
                                 names_from = Sex, values_from = monthly_mono_mort_rate) %>% mutate(excess_male = m/f)
 
 
@@ -93,7 +93,8 @@ excess_male_mort <- excess_male_mort %>% mutate(Age = factor(Age, levels = order
 png(file = paste("./Graphs/GGridges/USA_ages.png"), res = 300, width = 4400, height = 3500)
 
 excess_male_mort %>% # Ridge lines plot
-  filter(Region == "United States") %>% ggplot(aes( x = excess_male, y = Age, fill = Region))+ 
+  filter(Region == "United States" &
+           !(is.infinite(excess_male))) %>%  ggplot(aes( x = excess_male, y = Age, fill = Region))+ 
   geom_density_ridges(alpha = 0.6,
                       quantile_lines = TRUE,
                       quantile_fun = function(x,...)mean(x))+
@@ -115,7 +116,7 @@ png(file = paste("./Graphs/Trends/USA_trends.png"), res = 300, width = 4400, hei
 
 excess_male_mort %>% filter(!(is.infinite(excess_male)),
                             Region == "United States") %>% na.omit() %>% 
-  ggplot(aes(x = date, y = excess_male, color = Age)) +
+  ggplot(aes(x = Date, y = excess_male, color = Age)) +
   geom_line() + 
   scale_y_log10(limits = c(0.5,4))
 
@@ -133,7 +134,7 @@ excess_male_mort %>% filter(!(is.infinite(excess_male)),
                                        "75-79",
                                        "80-84",
                                        "85 +"))%>% 
-  ggplot(aes(x = date, y = excess_male, color = Age)) +
+  ggplot(aes(x = Date, y = excess_male, color = Age)) +
   geom_line() + 
   scale_y_log10(limits = c(0.5,4))
 
@@ -146,14 +147,13 @@ dev.off()
 
 states <- excess_male_mort %>% pull(Region) %>% unique()
 
-
 for(state in states){
   
   test <- excess_male_mort %>% filter(Region == state)
   
   png(file = paste("./Graphs/",state,"_excess.png", sep = ""), res = 300, width = 3000, height = 2600)
   
-  print(test %>% ggplot(aes(x = date, y = Age)) +
+  print(test %>% ggplot(aes(x = Date, y = Age)) +
     geom_tile(aes(fill = excess_male), width = 31)  +
     coord_cartesian(ylim = c(30, 85),
                     xlim = c(as.Date("2021-01-01"),as.Date("2022-01-01"))) +
@@ -199,7 +199,8 @@ median_mort <- median_mort %>% filter(Age %in% ages) %>%
   rename(state_name = Region)
 
 
-median_mort <- left_join(median_mort,states, by = 'state_name')
+median_mort <- left_join(median_mort,urbnmapr::states, by = 'state_name')
+
 
 for(age.group in ages){
   
