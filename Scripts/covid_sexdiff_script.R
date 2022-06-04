@@ -234,6 +234,25 @@ for(age.group in ages){
 
 
 
+#'* Variance per age group*
+
+#install.packages("beeswarm")
+library(beeswarm)
+
+# First draft
+
+for(age.group in ages){
+  
+  png(file = paste("./Graphs/Variance/",age.group,"_variance.png",sep = ""), res = 300, width = 4400, height = 2600)
+  
+  print(excess_male_mort %>% filter(Age == age.group) %>% 
+    ggplot(aes(x = Date, y = excess_male)) +
+    geom_point() + scale_y_continuous(trans = "log", limits = c(0.5,4)))
+  
+  dev.off()
+  
+}
+
 
 
 
