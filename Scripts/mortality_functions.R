@@ -24,22 +24,17 @@ function(temporary){
     summarise(Deaths = sum(Deaths)) %>% 
     ungroup() %>% 
     filter(Sex != "b") %>%                                          # Keep males and females
-    mutate(Day = as.Date(Date, tryFormats = c("%d.%m.%Y"))) %>%    # Transform to date
-    dplyr::mutate(year = lubridate::year(Day), 
-                  month = lubridate::month(Day), 
-                  day = lubridate::day(Day)) %>% 
-    select(-Date)
-  
-  # Now, we have various dates (but not all) available, we need to find the
-  # earliest and dates date available for each month and each state/age group
-  
-  # Earliest day for each month
-  
+    mutate(Date = as.Date(Date, tryFormats = c("%d.%m.%Y"))) %>%    # Transform to date
+    dplyr::mutate(year = lubridate::year(Date), 
+                  month = lubridate::month(Date), 
+                  day = lubridate::day(Date))
+
   # We want to estimate the number of deaths on the 1st of each month
   regions <- unique(df$Region)
   sexes <- unique(df$Sex)
   ages <- unique(df$Age)
   
+  # Establish the range of firsts of the month
   fst.month <- min(filter(df,year==2020)$month)
   lst.month <- max(filter(df,year==max(unique(df$year)))$month)
   
@@ -48,64 +43,41 @@ function(temporary){
   
   days <- seq(fst.date,lst.date,by="month")
     
-  deaths.first <- array(data=NA,dim=c(length(regions),length(days)),dimnames=list(regions,format(days)))
-  
+  # Desired structure, without the values
   first.days <- data.frame(expand.grid(regions,sexes,ages,days)) %>%
-    `colnames<-`(c("Region","Sex","Age","Day")) %>%
-    arrange(Region,Sex,Age,Day)
+    `colnames<-`(c("Region","Sex","Age","Date")) %>%
+    arrange(Region,Sex,Age,Date) %>%
+    dplyr::mutate(year = lubridate::year(Date), 
+                  month = lubridate::month(Date), 
+                  day = lubridate::day(Date))
     
-  df_firsts <- df %>% filter(day==1) %>% arrange(Region,Sex,Age,Day)
+  # Firsts of the month already in the data
+  df_firsts <- df %>% filter(day==1) %>% arrange(Region,Sex,Age,Date)
   
   df_first_month <- df %>% 
-    bind_rows(.,anti_join(first.days,df_firsts,by=c("Region","Sex","Age","Day"))) %>% 
-    arrange(Region,Sex,Age,Day) %>% 
-    mutate(year = lubridate::year(Day), 
-           month = lubridate::month(Day), 
-           day = lubridate::day(Day)) %>% 
+    bind_rows(.,anti_join(first.days,df_firsts,by=c("Region","Sex","Age","Date"))) %>%    # Add missing firsts to the data
+    arrange(Region,Sex,Age,Date) %>%
     group_by(Region,Sex,Age) %>% 
-    mutate(Deaths = ifelse(is.na(Deaths) & 0 %in% Deaths & Day < nth(Day,suppressWarnings(max(which(Deaths==0)))),
-                           0,Deaths),
-           lag = Deaths,
-           lead = Deaths) %>% 
-    fill(lag,.direction = "down") %>% 
+    mutate(Deaths = ifelse(is.na(Deaths) & 0 %in% Deaths & 
+                             Date < nth(Date,suppressWarnings(max(which(Deaths==0)))),    # Everything before 1st 0 is a 0
+                           0,Deaths)) %>%                                                              
+    filter(Date >= nth(Date,min(which(!is.na(Deaths))))) %>%                              # Remove remaining leading NAs
+    mutate(lag = Deaths, 
+           lead = Deaths,
+           lag.date = as.Date(ifelse(is.na(Deaths),NA,Date),origin='1970-01-01'),
+           lead.date = lag.date) %>% 
+    fill(lag,.direction = "down") %>%                                                     # Get previous and next non NA values
     fill(lead,.direction = "up") %>% 
-    mutate(Deaths = ifelse(is.na(Deaths) & !is.na(lag) & !is.na(lead) & lag == lead,
-                           lag,Deaths)) %>% 
-    filter(Day >= nth(Day,min(which(!is.na(Deaths))))) %>% 
-    mutate(lag.day = as.Date(ifelse(is.na(Deaths),NA,Day),origin='1970-01-01'),
-           lead.day = lag.day) %>% 
-    fill(lag.day,.direction = "down") %>% 
-    fill(lead.day,.direction = "up") %>% 
-    mutate(Deaths = ifelse(is.na(Deaths) & day == 1,
-                           lag+(lead-lag)*as.numeric(Day-lag.day)/as.numeric(lead.day-lag.day),
-                           Deaths)) %>% 
-    filter(day == 1)
+    fill(lag.date,.direction = "down") %>%                                                # Get dates of previous and next non NA values
+    fill(lead.date,.direction = "up") %>% 
+    mutate(Deaths = ifelse(is.na(Deaths) & day == 1,                                      # Linear interpolation
+                           lag+(lead-lag)*as.numeric(Date-lag.date)/as.numeric(lead.date-lag.date),
+                           Deaths)) %>%                                            
+    filter(day == 1)                                                            
 
-  
-  # df_min_dates <- df %>% 
-  #   group_by(Region,Sex,Age,year,month) %>% 
-  #   summarise(day = min(day)) %>% 
-  #   left_join(.,df, by = c("Region","Sex","Age","year","month","day")) %>% 
-  #   ungroup() %>% 
-  #   group_by("Region","Sex","Age") %>% 
-  #   mutate(days_between = (interval(Date, dplyr::lead(Date)) %/% days(1)),
-  #          deaths_between = dplyr::lead(Deaths)-Deaths,
-  #          days_before_first = (interval(Date, floor_date(dplyr::lead(Date),"month"))) %/% days(1), # Number of days until first of each month
-  #          Deaths_first = Deaths + deaths_between/days_between * days_before_first) %>% # Difference in days and deaths between two dates
-  #   mutate(Deaths = dplyr::lag(Deaths_first),day = 1) %>% 
-  #   ungroup() %>% 
-  #   select(Region, Sex, Age, year, month, day, Deaths) %>% 
-  #   mutate(Deaths = ifelse((Age == 0) & (Deaths > 220), NA, Deaths)) %>% 
-  #   na.omit() %>% 
-  #   filter(Deaths >= 0) %>% 
-  #   mutate(date = as.Date(paste(year, month, day, sep="/"), format = "%Y/%m/%d"))
-
-  # Deaths on the first of the month
-  
   save(df_first_month, file = "./Data/df_first_month.RData")
   
   # Monotonic splines by Tim Riffe
-  
   regions <- df %>% pull(Region) %>% unique()
   ages <- df %>% pull(Age) %>% unique()
   spline_deaths <- c()
@@ -115,36 +87,32 @@ function(temporary){
       for(age in ages){
         
         all_dates <- df %>% filter(Region == state & Sex == sex & Age == age)
-        
         first_of_month <- floor_date(all_dates$Date, "month") %>% unique()
-        
         monodeaths <- splinefun(as.integer(all_dates$Date), all_dates$Deaths, method = "monoH.FC")(as.integer(first_of_month))
-        
         monodeaths <- cbind(state, as.character(first_of_month), sex, age,  monodeaths)
-        
         monodeaths <- monodeaths[-1,]
-        
         spline_deaths <- rbind(spline_deaths, monodeaths)
-        
       }
     }
     print(state)
   }
   
   new <- spline_deaths %>% data.frame(.) 
-  colnames(new) <- c("Region", "date", "Sex", "Age", "Deaths_mono")
-  new <- new %>% mutate(date = as.Date(as.character(date)),
-                        Age = as.integer(Age),
-                        Deaths_mono = as.double(Deaths_mono))
+  colnames(new) <- c("Region", "Date", "Sex", "Age", "Deaths_mono")
+  new <- new %>% mutate(Age = as.integer(Age),
+                        Deaths_mono = as.double(Deaths_mono),
+                        Date = as.Date(Date))
   
   
-  # All values are essentially the same
-  joined <- left_join(df_first_month,new) %>% select(Region,Sex,Age, date, Deaths, Deaths_mono)
-  
+  # Comparison of linear interpolation and spline estimations
+  joined <- df_first_month %>% 
+    rename(Deaths_linint = Deaths) %>% 
+    left_join(.,new) %>% 
+    select(Region,Sex,Age, Date, Deaths_linint, Deaths_mono) %>% 
+    arrange(Region,Sex,Age,Date) %>% 
+    mutate(diff=Deaths_linint-Deaths_mono)
+
   save(joined, file = "./Data/df_first_month.RData")
-  
-  
-  
 }
 
 
