@@ -16,68 +16,93 @@ library(stats)
 # when called by Source in the main script file
 
 function(temporary){
-  # Download data
-  data <- download_covid(data = "Output_5")
   
-  # filter for United States only
-  df <- data %>% filter(Country == "USA")
-  
-  # Transform to date
-  df <- df %>% mutate(Date = as.Date(Date, tryFormats = c("%d.%m.%Y")))
-  
-  # Sum up groups that are over 85+, because we only have 85+ population groups
-  # in Census data
-  
-  df <- df %>% mutate(Age = ifelse(Age >=85, 85, Age)) %>% 
+  df <- download_covid(data = "Output_5") %>%                       # Download data
+    filter(Country == "USA",!is.na(Deaths)) %>%                     # Filter for United States only
+    mutate(Age = ifelse(Age >=85, 85, Age)) %>%                     # Sum up groups that are over 85+
     group_by(Region, Date, Sex, Age) %>% 
     summarise(Deaths = sum(Deaths)) %>% 
-    ungroup()
-  
-  # keep males and females
-  
-  df <- df %>% filter(Sex != "b")
+    ungroup() %>% 
+    filter(Sex != "b") %>%                                          # Keep males and females
+    mutate(Day = as.Date(Date, tryFormats = c("%d.%m.%Y"))) %>%    # Transform to date
+    dplyr::mutate(year = lubridate::year(Day), 
+                  month = lubridate::month(Day), 
+                  day = lubridate::day(Day)) %>% 
+    select(-Date)
   
   # Now, we have various dates (but not all) available, we need to find the
   # earliest and dates date available for each month and each state/age group
   
-  df <- df %>%
-    dplyr::mutate(year = lubridate::year(Date), 
-                  month = lubridate::month(Date), 
-                  day = lubridate::day(Date))
+  # Earliest day for each month
   
-  # earliest day for each month
-  df_min_dates <- df %>% 
-    group_by(Region,Sex,Age,year,month) %>% 
-    summarise(day = min(day))
+  # We want to estimate the number of deaths on the 1st of each month
+  regions <- unique(df$Region)
+  sexes <- unique(df$Sex)
+  ages <- unique(df$Age)
   
-  df_min_dates <- left_join(df_min_dates,df, by = c("Region", "Sex","Age","year","month","day"))
+  fst.month <- min(filter(df,year==2020)$month)
+  lst.month <- max(filter(df,year==max(unique(df$year)))$month)
   
-  # Difference in days and deaths between two dates
-  # Number of days until first of each month
+  fst.date <- as.Date(paste0("2020-",min(filter(df,year==2020)$month),"-1"))
+  lst.date <- as.Date(paste(max(unique(df$year)),max(filter(df,year==max(unique(df$year)))$month),"1",sep="-"))
   
-  df_min_dates <-df_min_dates %>% ungroup() %>% 
-    group_by("Region","Sex","Age") %>% 
-    mutate(days_between = (interval(Date, dplyr::lead(Date)) %/% days(1)),
-           deaths_between = dplyr::lead(Deaths)-Deaths,
-           days_before_first = (interval(Date, floor_date(dplyr::lead(Date),"month"))) %/% days(1),
-           Deaths_first = Deaths + deaths_between/days_between * days_before_first) 
+  days <- seq(fst.date,lst.date,by="month")
+    
+  deaths.first <- array(data=NA,dim=c(length(regions),length(days)),dimnames=list(regions,format(days)))
   
+  first.days <- data.frame(expand.grid(regions,sexes,ages,days)) %>%
+    `colnames<-`(c("Region","Sex","Age","Day")) %>%
+    arrange(Region,Sex,Age,Day)
+    
+  df_firsts <- df %>% filter(day==1) %>% arrange(Region,Sex,Age,Day)
+  
+  df_first_month <- df %>% 
+    bind_rows(.,anti_join(first.days,df_firsts,by=c("Region","Sex","Age","Day"))) %>% 
+    arrange(Region,Sex,Age,Day) %>% 
+    mutate(year = lubridate::year(Day), 
+           month = lubridate::month(Day), 
+           day = lubridate::day(Day)) %>% 
+    group_by(Region,Sex,Age) %>% 
+    mutate(Deaths = ifelse(is.na(Deaths) & 0 %in% Deaths & Day < nth(Day,suppressWarnings(max(which(Deaths==0)))),
+                           0,Deaths),
+           lag = Deaths,
+           lead = Deaths) %>% 
+    fill(lag,.direction = "down") %>% 
+    fill(lead,.direction = "up") %>% 
+    mutate(Deaths = ifelse(is.na(Deaths) & !is.na(lag) & !is.na(lead) & lag == lead,
+                           lag,Deaths)) %>% 
+    filter(Day >= nth(Day,min(which(!is.na(Deaths))))) %>% 
+    mutate(lag.day = as.Date(ifelse(is.na(Deaths),NA,Day),origin='1970-01-01'),
+           lead.day = lag.day) %>% 
+    fill(lag.day,.direction = "down") %>% 
+    fill(lead.day,.direction = "up") %>% 
+    mutate(Deaths = ifelse(is.na(Deaths) & day == 1,
+                           lag+(lead-lag)*as.numeric(Day-lag.day)/as.numeric(lead.day-lag.day),
+                           Deaths)) %>% 
+    filter(day == 1)
+
+  
+  # df_min_dates <- df %>% 
+  #   group_by(Region,Sex,Age,year,month) %>% 
+  #   summarise(day = min(day)) %>% 
+  #   left_join(.,df, by = c("Region","Sex","Age","year","month","day")) %>% 
+  #   ungroup() %>% 
+  #   group_by("Region","Sex","Age") %>% 
+  #   mutate(days_between = (interval(Date, dplyr::lead(Date)) %/% days(1)),
+  #          deaths_between = dplyr::lead(Deaths)-Deaths,
+  #          days_before_first = (interval(Date, floor_date(dplyr::lead(Date),"month"))) %/% days(1), # Number of days until first of each month
+  #          Deaths_first = Deaths + deaths_between/days_between * days_before_first) %>% # Difference in days and deaths between two dates
+  #   mutate(Deaths = dplyr::lag(Deaths_first),day = 1) %>% 
+  #   ungroup() %>% 
+  #   select(Region, Sex, Age, year, month, day, Deaths) %>% 
+  #   mutate(Deaths = ifelse((Age == 0) & (Deaths > 220), NA, Deaths)) %>% 
+  #   na.omit() %>% 
+  #   filter(Deaths >= 0) %>% 
+  #   mutate(date = as.Date(paste(year, month, day, sep="/"), format = "%Y/%m/%d"))
+
   # Deaths on the first of the month
-  # First dates available for every group has taken the value of the last 85+, we
-  # must eliminate that discrepancy.
-  
-  df_first_month <- df_min_dates %>% mutate(Deaths = dplyr::lag(Deaths_first),
-                                            day = 1) %>% ungroup() %>% 
-    select(Region, Sex, Age, year, month, day, Deaths) %>% 
-    mutate(Deaths = ifelse((Age == 0) & (Deaths > 220), NA, Deaths)) %>% 
-    na.omit() %>% 
-    filter(Deaths >= 0) %>% 
-    mutate(date = as.Date(paste(year, month, day, sep="/"), format = "%Y/%m/%d"))
   
   save(df_first_month, file = "./Data/df_first_month.RData")
-  
-  
-  
   
   # Monotonic splines by Tim Riffe
   
