@@ -17,6 +17,7 @@ library(lubridate)
 library(viridis)
 library(colorspace)
 library(ggridges)
+library(plotly)
 
 # Data
 load("./Data/df_first_month.RData")
@@ -252,6 +253,45 @@ for(age.group in ages){
   dev.off()
   
 }
+
+#'* 3D Surfaceplots*
+
+# While running up until line 68
+
+us_excess_male <- excess_male_mort %>% filter(Region == "United States",
+                                              !is.infinite(excess_male)) %>% 
+  ungroup()
+
+surface_matrix_us <- us_excess_male %>% select(Age, Date, excess_male) %>% pivot_wider(names_from = Age, values_from = excess_male) %>% 
+  column_to_rownames("Date")
+
+us_excess_male <- us_excess_male %>% group_by(Date) %>% 
+  mutate(Date_num = sequence(n())) %>% 
+  ungroup()
+
+
+plotly::plot_ly(data = us_excess_male,
+                x = ~ Date_num,
+                y = ~ Age,
+                z = ~ excess_male,
+                type = "surface") 
+
+#%>%
+  layout(xaxis = list(
+    range = 
+      c(as.numeric(as.POSIXct("2020-03-01", format="%Y-%m-%d"))*1000,
+        as.numeric(as.POSIXct("2022-05-01", format="%Y-%m-%d"))*1000),
+    type = "date"))
+
+typeof(us_excess_male$Date)
+
+ # colorbar(title = "Différence des logarithmes")
+
+print(d)
+
+# combiner les graphiques
+
+difference <- d %>% add_surface(z = exp(fit2D$logmortality), colorscale=list(c(0, 1), c("lightgrey", "lightgrey")), cauto=F, cmax=1, cmin=1, opacity = 0.8, showscale = F)
 
 
 
