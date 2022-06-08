@@ -18,6 +18,7 @@ library(viridis)
 library(colorspace)
 library(ggridges)
 library(plotly)
+library(rayshader)
 
 # Data
 load("./Data/df_first_month.RData")
@@ -254,46 +255,38 @@ for(age.group in ages){
   
 }
 
-#'* 3D Surfaceplots*
+#'* 3D Lexis surfaces*
 
 # While running up until line 68
 
-us_excess_male <- excess_male_mort %>% filter(Region == "United States",
-                                              !is.infinite(excess_male)) %>% 
-  ungroup()
-
-surface_matrix_us <- us_excess_male %>% select(Age, Date, excess_male) %>% pivot_wider(names_from = Age, values_from = excess_male) %>% 
-  column_to_rownames("Date")
-
-us_excess_male <- us_excess_male %>% group_by(Date) %>% 
-  mutate(Date_num = sequence(n())) %>% 
-  ungroup()
-
-
-plotly::plot_ly(data = us_excess_male,
-                x = ~ Date_num,
-                y = ~ Age,
-                z = ~ excess_male,
-                type = "surface") 
-
-#%>%
-  layout(xaxis = list(
-    range = 
-      c(as.numeric(as.POSIXct("2020-03-01", format="%Y-%m-%d"))*1000,
-        as.numeric(as.POSIXct("2022-05-01", format="%Y-%m-%d"))*1000),
-    type = "date"))
-
-typeof(us_excess_male$Date)
-
- # colorbar(title = "Différence des logarithmes")
-
-print(d)
-
-# combiner les graphiques
-
-difference <- d %>% add_surface(z = exp(fit2D$logmortality), colorscale=list(c(0, 1), c("lightgrey", "lightgrey")), cauto=F, cmax=1, cmin=1, opacity = 0.8, showscale = F)
+Lexis_surface <- function(state){
+  test <- excess_male_mort %>% filter(Region == state)
+  
+  return(test %>% ggplot(aes(x = Date, y = Age)) +
+          geom_tile(aes(fill = excess_male), width = 31)  +
+          coord_cartesian(ylim = c(30, 85),
+                          xlim = c(as.Date("2021-01-01"),as.Date("2022-01-01"))) +
+          theme_light() +
+          labs(x = "Month",
+               y = "Age group",
+               title = paste("COVID-19 mortality ratio by month, ",state,", 2021-2022", sep = "")) +
+          scale_fill_continuous_diverging(trans = "log",
+                                          breaks = c(0.5,1,2,4),
+                                          limits = c(0.5,4),
+                                          palette = "Purple-Green",
+                                          name = "COVID-19 mortality ratio"))
+}
 
 
+#Lines
+pp <- Lexis_surface("United States")
+
+par(mfrow = c(1, 2))
+plot_gg(pp, width = 5, height = 4, scale = 300, raytrace = FALSE, preview = TRUE)
+plot_gg(pp, width = 5, height = 4, scale = 300, multicore = TRUE, windowsize = c(1000, 800))
+render_camera(fov = 70, zoom = 0.5, theta = 130, phi = 35)
+Sys.sleep(0.2)
+render_snapshot(clear = TRUE)
 
 
 
