@@ -122,8 +122,6 @@ excess_male_mort <- excess_male_mort %>%
 excess_male_mort_gg <- excess_male_mort %>% 
   mutate(type = ifelse(Region %in% c("United States","West","South","Northeast","Midwest"),Region,"US state"))
 
-evolution_plot(excess_male_mort_gg,"excess_70")
-
 evolution_plot <- function(data, var) {
   gg.sex_ratio_age <- ggplot(data, aes(x = Date, y = get(var), group = Region, colour=type)) +
     geom_line(filter(data,type == "US state"),mapping=aes(x = Date, y = get(var), group = Region, colour=type)) +
@@ -138,6 +136,8 @@ evolution_plot <- function(data, var) {
   
   return(gg.sex_ratio_age)
 }
+
+evolution_plot(excess_male_mort_gg,"excess_70")
 
 png(file = paste("./Graphs/GGridges/USA_ages.png"), res = 300, width = 4400, height = 3500)
 
