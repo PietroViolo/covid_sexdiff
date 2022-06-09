@@ -160,6 +160,27 @@ mortality_function <- function(df) {
   
 }
 
+link_census_regions <- function(data,state_var = "State") {
+  # US CENSUS REGIONS
+  northeast <- c("Connecticut", "Maine", "Massachusetts", "New Hampshire",
+                 "Rhode Island", "Vermont", "New Jersey", "New York", "Pennsylvania")
+  midwest <- c("Illinois", "Indiana", "Michigan", "Ohio", "Wisconsin", "Iowa", "Kansas", "Minnesota",
+               "Missouri", "Nebraska", "North Dakota", "South Dakota")
+  south <- c("Delaware", "District of Columbia", "Florida", "Georgia", "Maryland", "North Carolina",
+             "South Carolina", "Virginia", "West Virginia", "Alabama", "Kentucky", "Mississippi",
+             "Tennessee", "Arkansas", "Louisiana", "Oklahoma", "Texas")
+  west <- c("Arizona", "Colorado", "Idaho", "Montana", "Nevada", "New Mexico", "Utah", "Wyoming",
+            "Alaska", "California", "Hawaii", "Oregon", "Washington")
+  
+  data <- data %>% 
+    mutate(census_region = case_when(get(state_var) %in% northeast ~ "Northeast",
+                                     get(state_var) %in% midwest ~ "Midwest",
+                                     get(state_var) %in% south ~ "South",
+                                     get(state_var) %in% west ~ "West"))
+  
+  return(data)
+}
+
 
 
 

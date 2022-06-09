@@ -33,14 +33,24 @@ source("./Scripts/mortality_functions.R")
 
 df_monthly_deaths <- joined %>% 
   group_by(Region, Sex, Age) %>% 
+  select(-diff) %>% 
   mutate(Deaths_per_month = dplyr::lead(Deaths_linint) - Deaths_linint, # Calculate number of deaths per month
          Deaths_per_month_mono = ifelse(c(0,diff(Deaths_mono))<0,0, diff(Deaths_mono)), # Same calculation, but for monotonic splines
          Region = ifelse(Region=="All", "United States", Region))  #Change "All" name to allow joining
-  
-
-
+ 
 # Mortality rate : attach population
 df_mort <- mortality_function(df_monthly_deaths)
+
+df_mort <- df_mort %>%  
+  link_census_regions(.,"Region") %>% 
+  filter(!is.na(census_region)) %>% 
+  group_by(census_region, Sex, Age, Date) %>% 
+  summarize(Deaths_per_month = sum(Deaths_per_month,na.rm=T),
+            Deaths_per_month_mono = sum(Deaths_per_month_mono,na.rm=T),
+            Pop = sum(Pop)) %>% 
+  rename(Region = census_region) %>% 
+  bind_rows(.,df_mort) %>% 
+  select(-c(Deaths_linint,Deaths_mono))
 
 # Negative deaths are neglible, we can round to 0
 
@@ -91,6 +101,43 @@ order <- excess_male_mort %>% pull(Age) %>% unique()
 
 excess_male_mort <- excess_male_mort %>% mutate(Age = factor(Age, levels = order))
 
+excess_male_mort <- excess_male_mort %>% 
+  select(-c("f","m")) %>% 
+  filter(!is.na(excess_male),Age %in% c("45-49","50-54","55-59","60-64","65-69","70-74","75-79","80-84","85 +")) %>% 
+  pivot_wider(names_from = "Age",values_from = "excess_male") %>% 
+  rename(excess_45 = `45-49`,
+         excess_50 = `50-54`,
+         excess_55 = `55-59`,
+         excess_60 = `60-64`,
+         excess_65 = `65-69`,
+         excess_70 = `70-74`,
+         excess_75 = `75-79`,
+         excess_80 = `80-84`,
+         excess_85 = `85 +`) %>% 
+  mutate(ratio_75_85 = excess_75/excess_85) %>% 
+  filter(is.finite(ratio_75_85))
+
+
+# Spaghetti plot tracking the evolution of the ratio
+excess_male_mort_gg <- excess_male_mort %>% 
+  mutate(type = ifelse(Region %in% c("United States","West","South","Northeast","Midwest"),Region,"US state"))
+
+evolution_plot(excess_male_mort_gg,"excess_70")
+
+evolution_plot <- function(data, var) {
+  gg.sex_ratio_age <- ggplot(data, aes(x = Date, y = get(var), group = Region, colour=type)) +
+    geom_line(filter(data,type == "US state"),mapping=aes(x = Date, y = get(var), group = Region, colour=type)) +
+    geom_line(filter(data,type != "US state"),mapping=aes(x = Date, y = get(var), group = Region, colour=type)) +
+    labs(x = "Date", y="Excess male mortality", title = "") +
+    scale_y_continuous(trans = "log",
+                       breaks = c(0.5,1,2,4),
+                       limits = c(0.5,4)) +
+    scale_color_manual(values = c("lightgray","red","darkgreen","darkgoldenrod1","cyan3","darksalmon"),
+                       breaks = c("US state","United States","West","South","Northeast","Midwest")) +
+    theme_fivethirtyeight()
+  
+  return(gg.sex_ratio_age)
+}
 
 png(file = paste("./Graphs/GGridges/USA_ages.png"), res = 300, width = 4400, height = 3500)
 
