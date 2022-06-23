@@ -17,11 +17,16 @@ library(colorspace)
 library(ggridges)
 library(plotly)
 library(rayshader)
+library(cowplot)
 
 # Data
 load("./Data/df_first_month.RData")
 
 source("./Scripts/mortality_functions.R")
+
+ages <- c("30-34","35-39","40-44","45-49","50-54","55-59", "60-64","65-69","70-74","75-79", "80-84","85 +")
+
+# Evolution of mortality rate and total deaths
 
 df_monthly_deaths <- joined %>% 
   group_by(Region, Sex, Age) %>% 
@@ -44,6 +49,80 @@ df_mort <- mortality_function(df_monthly_deaths) %>%
 
 excess_male_mort <- pivot_wider(df_mort %>%  select(Region, Sex, Age, Date, monthly_mort_rate), 
                                 names_from = Sex, values_from = monthly_mort_rate) %>% mutate(excess_male = m/f)
+
+excess_male_mort <- excess_male_mort %>%              # Change age groups id
+  mutate(Age = case_when(Age == 0 ~ "0-4",
+                         Age == 5 ~ "5-9",
+                         Age == 10 ~ "10-14",
+                         Age == 15 ~ "15-19",
+                         Age == 20 ~ "20-24",
+                         Age == 25 ~ "25-29",
+                         Age == 30 ~ "30-34",
+                         Age == 35 ~ "35-39",
+                         Age == 40 ~ "40-44",
+                         Age == 45 ~ "45-49",
+                         Age == 50 ~ "50-54",
+                         Age == 55 ~ "55-59",
+                         Age == 60 ~ "60-64",
+                         Age == 65 ~ "65-69",
+                         Age == 70 ~ "70-74",
+                         Age == 75 ~ "75-79",
+                         Age == 80 ~ "80-84",
+                         Age == 85 ~ "85 +"))
+
+
+
+
+# CDC all deaths
+cdc_deaths <- read.csv("./Data/Provisional_COVID-19_Deaths_by_Sex_and_Age.csv") %>% 
+  filter(State == "United States", 
+         Sex == "All Sexes",
+         Age.Group == "All Ages",
+         Group == "By Month") %>% 
+  mutate(Date = as.Date(paste(Year, "-", Month, "-01", sep = "")))
+
+covid_deaths <- cdc_deaths %>% ggplot(aes(x = Date, y = COVID.19.Deaths)) +
+  geom_line()+
+  xlim(as.Date(c("2020-01-01", "2022-06-01")))
+
+
+for(age_group in ages){
+  
+  x <- excess_male_mort %>% filter(Region != "United States",
+                                 Age == age_group) %>% 
+  ggplot(aes(x = Date, y = excess_male, group = Region)) +
+  geom_line(color = "gray53") + geom_line(data = excess_male_mort %>% filter(Region == "United States",
+                                                             Age == age_group), 
+                          aes(x = Date, y = excess_male), color = "red") +
+  scale_y_log10(limits = c(0.5, 4)) +
+  xlim(as.Date(c("2020-01-01", "2022-06-01"))) +
+  theme(legend.position = "bottom") +
+  labs(x = "Date", y = "Male-to-female mortality ratio")
+  
+  assign(paste("excess_",age_group,sep =""), x)
+  
+}
+
+
+plot_grid(`excess_30-34`,
+          `excess_35-39`,
+          `excess_40-44`,
+          `excess_45-49`,
+          `excess_50-54`,
+          `excess_55-59`,
+          `excess_60-64`,
+          `excess_65-69`,
+          `excess_70-74`,
+          `excess_75-79`,
+          `excess_80-84`,
+          `excess_85 +`
+          ,ncol = 1, align = "v")
+
+
+
+
+
+
 
 
 
