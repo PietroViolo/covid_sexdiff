@@ -172,7 +172,7 @@ evolution_plot <- function(data, var) {
   return(gg.sex_ratio_age)
 }
 
-evolution_plot(excess_male_mort_gg,"excess_70")
+evolution_plot(excess_male_mort_gg,"excess_85")
 
 png(file = paste("./Graphs/GGridges/USA_ages.png"), res = 300, width = 4400, height = 3500)
   

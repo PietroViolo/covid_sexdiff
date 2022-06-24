@@ -183,6 +183,50 @@ link_census_regions <- function(data,state_var = "State") {
   return(data)
 }
 
+# Get 85+ populations from USHMD death rates and official death counts
+# Results are inconsistent (USHMD must have adjusted their exposures to account for biases)
+
+ushmd2019 <- data.frame()
+
+for (i in list.dirs(".",recursive = F)) {
+  state <- substr(i,nchar(i)-1,nchar(i))
+  
+  for (s in c("f","m")) {
+    i2019 <- read.csv(paste0("Data/lifetables/States/",i,"/",state,"_",s,"ltper_5x1.csv")) %>%
+      filter(Year == 2019) %>% 
+      select(PopName,Sex,Age,mx)
+    
+    ushmd2019 <- bind_rows(ushmd2019,i2019)
+  }
+}
+
+ushmd2019 <- ushmd2019 %>% 
+  mutate(PopName = state.name[match(PopName,state.abb)]) %>% 
+  rename(State = PopName) %>% 
+  mutate(Age = as.integer(gsub("[-+].*$","",Age)))
+  
+
+deaths2019 <- read.delim("../../Multiple Cause of Death, 2018-2020, Single Race.txt") %>% 
+  mutate(Sex = tolower(Gender.Code)) %>% 
+  select(State,Age=Five.Year.Age.Groups.Code,Sex,Deaths,Population) %>% 
+  mutate(Age = as.integer(gsub("[-+].*$","",Age)))
+
+pop2019_off <- read.csv("../../USpop.csv") %>% 
+  select(State = NAME, Sex = SEX, Age = AGE, POPEST2019_CIV) %>% 
+  filter(Age == 85, Sex != 0) %>% 
+  mutate(Sex = ifelse(Sex == 1, "m", "f"))
+
+pop2019_85 <- left_join(ushmd2019,deaths2019,by=c("State","Age","Sex")) %>% 
+  mutate(Deaths = as.integer(ifelse(Deaths == "Suppressed",NA,Deaths))) %>% 
+  mutate(Pop_est = Deaths/mx,
+         Pop_est = ifelse(Age == 100, NA, Pop_est),
+         Age = as.integer(gsub("[-+].*$","",Age))) %>% 
+  filter(between(Age,85,100)) %>% 
+  left_join(.,pop2019_off) %>% 
+  group_by(State,Sex) %>% 
+  mutate(Pop_est = ifelse(sum(is.na(Pop_est)) == 1 & is.na(Pop_est), first(POPEST2019_CIV)-sum(Pop_est,na.rm=T), Pop_est))
+  
+  
 
 
 
