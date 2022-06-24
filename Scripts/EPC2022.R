@@ -26,6 +26,79 @@ source("./Scripts/mortality_functions.R")
 
 ages <- c("30-34","35-39","40-44","45-49","50-54","55-59", "60-64","65-69","70-74","75-79", "80-84","85 +")
 
+#  Total mortality rate
+
+days_between = interval(min(joined$Date),max(joined$Date)) %/% days(1)
+
+# There are 791 days for total deaths, so we need to divide the total deaths by 791
+# then multiply by 365 to obtain yearly mortality rate
+
+Cumulative_deaths <- joined %>% filter(Date == max(joined$Date)) %>% 
+  mutate(Region = ifelse(Region=="All", "United States", Region), #Change "All" name to allow joining
+         Region = ifelse(Region == "New York City", "New York", Region)) %>%  # Change New York City to New York to combine
+  group_by(Region, Sex, Age, Date) %>% 
+  summarise( Covid_deaths = sum(Deaths_linint, na.rm = T)) %>% 
+  filter(Region != "United States", 
+         Region != "Puerto Rico") 
+
+
+Cumulative_deaths <- mortality_function(Cumulative_deaths) %>% 
+  mutate(yearly_death_rate = Covid_deaths/(Pop/791*365) * 1000) 
+
+Cumulative_deaths <- Cumulative_deaths %>%              # Change age groups id
+  mutate(Age = case_when(Age == 0 ~ "0-4",
+                         Age == 5 ~ "5-9",
+                         Age == 10 ~ "10-14",
+                         Age == 15 ~ "15-19",
+                         Age == 20 ~ "20-24",
+                         Age == 25 ~ "25-29",
+                         Age == 30 ~ "30-34",
+                         Age == 35 ~ "35-39",
+                         Age == 40 ~ "40-44",
+                         Age == 45 ~ "45-49",
+                         Age == 50 ~ "50-54",
+                         Age == 55 ~ "55-59",
+                         Age == 60 ~ "60-64",
+                         Age == 65 ~ "65-69",
+                         Age == 70 ~ "70-74",
+                         Age == 75 ~ "75-79",
+                         Age == 80 ~ "80-84",
+                         Age == 85 ~ "85 +"))
+
+
+order <- Cumulative_deaths %>% filter(Sex == "m",
+                                      Age == "85 +") %>%
+  arrange(desc(yearly_death_rate)) %>% pull(Region) %>% as.character()
+
+Cumulative_deaths <- Cumulative_deaths %>% mutate(Region = factor(Region, levels = order))
+
+for(age_group in ages){
+  
+  x <- Cumulative_deaths %>% filter(Age== age_group) %>% ggplot(aes( x= Region, y = yearly_death_rate, color = Sex)) +
+    geom_point() + 
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank())+ labs(y = age_group) + 
+    scale_y_log10()
+  
+  assign(paste("plot_",age_group, sep = ""), x)
+  
+  
+}
+
+axis = mratesdf %>% filter(Age==45) %>% ggplot(aes(x= State, y = mrate, color = Sex)) + geom_point() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  theme(panel.ontop = TRUE,
+        axis.ticks.y=element_blank())+ labs(y = "   ")
+
+
+
+
+
+
+
+
 # Evolution of mortality rate and total deaths
 
 df_monthly_deaths <- joined %>% 
@@ -104,6 +177,8 @@ for(age_group in ages){
 }
 
 
+png(file = paste("./Graphs/EPC2022/.png"), res = 300, width = 4400, height = 3500)
+
 plot_grid(`excess_30-34`,
           `excess_35-39`,
           `excess_40-44`,
@@ -118,6 +193,7 @@ plot_grid(`excess_30-34`,
           `excess_85 +`
           ,ncol = 1, align = "v")
 
+dev.off()
 
 
 
