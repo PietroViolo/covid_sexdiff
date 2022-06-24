@@ -29,14 +29,20 @@ load("./Data/df_first_month.RData")
 
 source("./Scripts/mortality_functions.R")
 
+joined <- joined %>% 
+  mutate(Region = ifelse(Region=="All", "United States", Region), #Change "All" name to allow joining
+         Region = ifelse(Region == "New York City", "New York", Region)) %>%  # Change New York City to New York to combine
+  group_by(Region, Sex, Age, Date) %>% 
+  summarise( Covid_deaths = sum(Deaths_linint, na.rm = T)) %>% 
+  filter(Region != "Puerto Rico") 
+
 # Calculate numbers of deaths that have occurred during the month
 
 df_monthly_deaths <- joined %>% 
   group_by(Region, Sex, Age) %>% 
   select(-diff) %>% 
   mutate(Deaths_per_month = dplyr::lead(Deaths_linint) - Deaths_linint, # Calculate number of deaths per month
-         Deaths_per_month_mono = ifelse(c(0,diff(Deaths_mono))<0,0, diff(Deaths_mono)), # Same calculation, but for monotonic splines
-         Region = ifelse(Region=="All", "United States", Region))  #Change "All" name to allow joining
+         Deaths_per_month_mono = ifelse(c(0,diff(Deaths_mono))<0,0, diff(Deaths_mono))) # Same calculation, but for monotonic splines
  
 # Mortality rate : attach population
 df_mort <- mortality_function(df_monthly_deaths)
@@ -44,15 +50,14 @@ df_mort <- mortality_function(df_monthly_deaths)
 df_mort <- df_mort %>%  
   link_census_regions(.,"Region") %>% 
   filter(!is.na(census_region)) %>% 
-  group_by(census_region, Sex, Age, Date) %>% 
+  group_by(Region,census_region, Sex, Age, Date) %>% 
   summarize(Deaths_per_month = sum(Deaths_per_month,na.rm=T),
             Deaths_per_month_mono = sum(Deaths_per_month_mono,na.rm=T),
             Pop = sum(Pop)) %>% 
-  rename(Region = census_region) %>% 
   bind_rows(.,df_mort) %>% 
   select(-c(Deaths_linint,Deaths_mono))
 
-# Negative deaths are neglible, we can round to 0
+# Negative deaths are negligible, we can round to 0
 
 df_mort <- df_mort %>% mutate(Deaths_per_month = ifelse(Deaths_per_month <= 0, 0, Deaths_per_month),
                    Deaths_per_month_mono = ifelse(Deaths_per_month_mono <= 0, 0, Deaths_per_month_mono)) %>% 
@@ -101,6 +106,37 @@ order <- excess_male_mort %>% pull(Age) %>% unique()
 
 excess_male_mort <- excess_male_mort %>% mutate(Age = factor(Age, levels = order))
 
+excess_male_mort %>% # Ridge lines plot
+  filter(Region == "United States" &
+           !(is.infinite(excess_male))) %>%  ggplot(aes( x = excess_male, y = Age, fill = Region))+ 
+  geom_density_ridges(alpha = 0.6,
+                      quantile_lines = TRUE,
+                      quantile_fun = function(x,...)mean(x))+
+  theme_ridges(font_size = 12, grid = TRUE) +
+  theme_fivethirtyeight() + 
+  xlim(c(0.5,4)) + 
+  labs (title = "Male-to-female ratios of COVID-19 for the United States",
+        x = "Male-to-female mortality ratio",
+        y = "Age groups") + 
+  geom_vline(xintercept = 1, color = "white")
+
+
+
+# Spaghetti plot tracking the evolution of the ratio
+
+
+excess_male_mort %>% filter(Region == "United States",
+                            Age >= 30) %>% 
+  ggplot(aes(x = Age, y = excess_male, color = Date, group = Date)) +
+  geom_line()
+
+
+
+
+
+
+
+
 excess_male_mort <- excess_male_mort %>% 
   select(-c("f","m")) %>% 
   filter(!is.na(excess_male),Age %in% c("45-49","50-54","55-59","60-64","65-69","70-74","75-79","80-84","85 +")) %>% 
@@ -118,7 +154,6 @@ excess_male_mort <- excess_male_mort %>%
   filter(is.finite(ratio_75_85))
 
 
-# Spaghetti plot tracking the evolution of the ratio
 excess_male_mort_gg <- excess_male_mort %>% 
   mutate(type = ifelse(Region %in% c("United States","West","South","Northeast","Midwest"),Region,"US state"))
 
@@ -140,22 +175,6 @@ evolution_plot <- function(data, var) {
 evolution_plot(excess_male_mort_gg,"excess_70")
 
 png(file = paste("./Graphs/GGridges/USA_ages.png"), res = 300, width = 4400, height = 3500)
-
-excess_male_mort %>% # Ridge lines plot
-  filter(Region == "United States" &
-           !(is.infinite(excess_male))) %>%  ggplot(aes( x = excess_male, y = Age, fill = Region))+ 
-  geom_density_ridges(alpha = 0.6,
-                      quantile_lines = TRUE,
-                      quantile_fun = function(x,...)mean(x))+
-  theme_ridges(font_size = 12, grid = TRUE) +
-  theme_fivethirtyeight() + 
-  xlim(c(0.5,4)) + 
-  labs (title = "Male-to-female ratios of COVID-19 for the United States",
-                           x = "Male-to-female mortality ratio",
-                           y = "Age groups") + 
-  geom_vline(xintercept = 1, color = "white")
-
-dev.off()
   
 
 
@@ -285,22 +304,6 @@ for(age.group in ages){
 
 #'* Variance per age group*
 
-#install.packages("beeswarm")
-library(beeswarm)
-
-# First draft
-
-for(age.group in ages){
-  
-  png(file = paste("./Graphs/Variance/",age.group,"_variance.png",sep = ""), res = 300, width = 4400, height = 2600)
-  
-  print(excess_male_mort %>% filter(Age == age.group) %>% 
-    ggplot(aes(x = Date, y = excess_male)) +
-    geom_point() + scale_y_continuous(trans = "log", limits = c(0.5,4)))
-  
-  dev.off()
-  
-}
 
 #'* 3D Lexis surfaces*
 
