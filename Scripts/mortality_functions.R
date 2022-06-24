@@ -126,7 +126,9 @@ mortality_function <- function(df) {
   # Combine single age into the same groups as our COVID-19 deaths age group
   # 2019 population
   
-  df_pop <- read.csv("./Data/USpop.csv") %>% select(NAME, SEX, AGE,POPEST2019_CIV) %>% 
+  df_pop <- read.csv("./Data/USpop.csv") %>% 
+    filter(AGE != 999) %>% 
+    select(NAME, SEX, AGE,POPEST2019_CIV) %>% 
     mutate(Age=case_when(AGE%in%0:4~0L,
                          AGE%in%5:9~5L,
                          AGE%in%10:14~10L,
@@ -144,7 +146,7 @@ mortality_function <- function(df) {
                          AGE%in%70:74~70L,
                          AGE%in%75:79~75L,
                          AGE%in%80:84~80L,
-                         AGE%in%85:999~85L),
+                         AGE==85 ~ 85L),
            Sex=case_when(SEX==0~"b",
                          SEX==1~"m",
                          SEX==2~"f")) %>% 
