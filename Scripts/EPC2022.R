@@ -118,6 +118,31 @@ Cumulative_deaths <- joined %>% group_by(Region, Sex, Age, Population_2019) %>%
   mutate(yearly_death_rate = Covid_deaths/(Population_2019/days_between*365) * 1000)
 
 
+
+Cumulative_deaths <- read.csv("./Data/Provisional_COVID-19_Deaths_by_Sex_and_Age.csv") %>% 
+  filter(Group == "By Total",
+         Sex != "All Sexes") %>% 
+  filter(Age.Group %in% ages_10) %>% select(Year,
+                                            Month, 
+                                            State, 
+                                            Sex, 
+                                            Age.Group,
+                                            COVID.19.Deaths) %>% 
+  rename(Region = State,
+         Age = Age.Group,
+         Covid_deaths = COVID.19.Deaths) %>% 
+  mutate(Region = ifelse(Region == "New York City", "New York", Region)) %>%
+  group_by(Region, Sex, Age) %>% 
+  summarise( Covid_deaths = sum(Covid_deaths, na.rm = T))
+
+Cumulative_deaths <- left_join(Cumulative_deaths, uspop)
+
+Cumulative_deaths <- Cumulative_deaths %>% 
+  filter(Region != "Puerto Rico")%>% 
+  mutate(yearly_death_rate = Covid_deaths/(Population_2019/days_between*365) * 1000)
+
+
+
 #'*With Coverage Data*
 
 Cumulative_deaths <- mortality_function(joined %>% filter(Date == max(joined$Date))) %>% 
@@ -145,6 +170,7 @@ Cumulative_deaths <- Cumulative_deaths %>%              # Change age groups id
 
 
 # Resume
+ages
 
 order <- Cumulative_deaths %>% filter(Sex == "Male",
                                       Age == "85 years and over") %>%
@@ -221,7 +247,10 @@ ggpubr::ggarrange(`plot_25-34 years`,
                   `plot_85 years and over`,
                   axis,
                   common.legend = T,
-                  ncol = 1)
+                  ncol = 1)  + 
+  theme(text = element_text(size=15, family="LM Roman 10"))  +
+  theme(legend.title = element_text( size=13), legend.text=element_text(size=10),
+        plot.title = element_text(size=17))
 
 dev.off()
 
@@ -342,10 +371,10 @@ id_graphs %>%
   theme(legend.position = "none") +
   labs(x = "",
        y = "Male-to-female \nmortality ratio",
-       title = "Male-to-female mortality ratio for 25-34 years old, 2020-2022") + 
+       title = "COVID-19 Male-to-female mortality ratio for ages 25-34, 2020-2022") + 
   theme(text = element_text(size=15, family="LM Roman 10"))  +
   theme(legend.title = element_text( size=13), legend.text=element_text(size=10),
-        plot.title = element_text(size=20))
+        plot.title = element_text(size=17))
 
 dev.off()
 
@@ -365,10 +394,10 @@ id_graphs %>%
   theme(legend.position = "none") +
   labs(x = "",
        y = "Male-to-female \nmortality ratio",
-       title = "Male-to-female mortality ratio for 35-44 years old, 2020-2022") + 
+       title = "COVID-19 Male-to-female mortality ratio for ages 35-44, 2020-2022") + 
   theme(text = element_text(size=15, family="LM Roman 10"))  +
   theme(legend.title = element_text( size=13), legend.text=element_text(size=10),
-        plot.title = element_text(size=20))
+        plot.title = element_text(size=17))
 
 dev.off()
 
@@ -387,10 +416,10 @@ id_graphs %>%
   theme(legend.position = "none") +
   labs(x = "",
        y = "Male-to-female \nmortality ratio",
-       title = "Male-to-female mortality ratio for 45-54 years old, 2020-2022") + 
+       title = "COVID-19 Male-to-female mortality ratio for ages 45-54, 2020-2022") + 
   theme(text = element_text(size=15, family="LM Roman 10"))  +
   theme(legend.title = element_text( size=13), legend.text=element_text(size=10),
-        plot.title = element_text(size=20))
+        plot.title = element_text(size=17))
 
 dev.off()
 
@@ -410,10 +439,10 @@ id_graphs %>%
   theme(legend.position = "none") +
   labs(x = "",
        y = "Male-to-female \nmortality ratio",
-       title = "Male-to-female mortality ratio for 55-64 years old, 2020-2022") + 
+       title = "COVID-19 Male-to-female mortality ratio for ages 55-64, 2020-2022") + 
   theme(text = element_text(size=15, family="LM Roman 10"))  +
   theme(legend.title = element_text( size=13), legend.text=element_text(size=10),
-        plot.title = element_text(size=20))
+        plot.title = element_text(size=17))
 
 dev.off()
 
@@ -434,10 +463,10 @@ id_graphs %>%
   theme(legend.position = "none") +
   labs(x = "",
        y = "Male-to-female \nmortality ratio",
-       title = "Male-to-female mortality ratio for 65-74 years old, 2020-2022") + 
+       title = "COVID-19 Male-to-female mortality ratio for ages 65-74, 2020-2022") + 
   theme(text = element_text(size=15, family="LM Roman 10"))  +
   theme(legend.title = element_text( size=13), legend.text=element_text(size=10),
-        plot.title = element_text(size=20))
+        plot.title = element_text(size=17))
 
 dev.off()
 
@@ -457,10 +486,37 @@ id_graphs %>%
   theme(legend.position = "none") +
   labs(x = "",
        y = "Male-to-female \nmortality ratio",
-       title = "Male-to-female mortality ratio for 75-84 years old, 2020-2022") + 
+       title = "COVID-19 Male-to-female mortality ratio for ages 75-84, 2020-2022") + 
   theme(text = element_text(size=15, family="LM Roman 10"))  +
   theme(legend.title = element_text( size=13), legend.text=element_text(size=10),
-        plot.title = element_text(size=20))
+        plot.title = element_text(size=17))
+
+dev.off()
+
+
+
+
+
+
+
+tiff("./EPC 2022/Graphs/evolution_over_time_7.tiff", width = 5120, height = 2880, res=500)
+
+id_graphs %>% 
+  filter(Age == ages_10[11]) %>% 
+  ggplot(aes(x = Date, y = excess_male, group = Age)) +
+  geom_line(data = id_graphs %>% filter(Age %in% ages_10[5:10]), 
+            aes(x = Date, y = excess_male, group = Age), color = "gray80", size = 1.5) +
+  geom_line(color = "navy", size = 1.5) +
+  scale_y_log10(limits = c(0.7, 3)) +
+  scale_x_date(date_breaks = "4 months", date_minor_breaks = "1 month", date_labels = "%b %Y",
+               limits = c(as.Date("20200215","%Y%m%d"),as.Date("20220515","%Y%m%d"))) +
+  theme(legend.position = "none") +
+  labs(x = "",
+       y = "Male-to-female \nmortality ratio",
+       title = "COVID-19 Male-to-female mortality ratio for ages 85+, 2020-2022") + 
+  theme(text = element_text(size=15, family="LM Roman 10"))  +
+  theme(legend.title = element_text( size=13), legend.text=element_text(size=10),
+        plot.title = element_text(size=17))
 
 dev.off()
 
@@ -489,7 +545,7 @@ library(gganimate)
 library(gifski)
 library(transformr)
 
-tiff("./EPC 2022/Graphs/ridge_lines.tiff", width = 3300, height = 6000, res=500)
+tiff("./EPC 2022/Graphs/ridge_lines.tiff", width = 5000, height = 6000, res=500)
 
 excess_male_mort %>% # Ridge lines plot
   filter(!(is.infinite(excess_male)),
@@ -500,15 +556,18 @@ excess_male_mort %>% # Ridge lines plot
   geom_density_ridges(alpha = 0.6,
                       quantile_lines = TRUE,
                       quantile_fun = function(x,...)median(x),
-                      fill = "navy")+
-  theme_ridges(font_size = 12, grid = TRUE) +
-  theme_fivethirtyeight() + 
+                      fill = "navy",
+                      color = "grey90")+
+  theme_ridges(font_size = 13, grid = TRUE)  + 
   xlim(c(0.5,4))  + 
   geom_vline(xintercept = 1, color = "black") +
   scale_x_log10(limits = c(0.5, 4)) +
-  labs( title = "Male-to-female mortality ratio, United-States, 2020-2022",
+  labs( title = "COVID-19 Male-to-female mortality ratio, United-States, 2020-2022",
         y = "Age group",
-        x = "Male-to-female mortality ratio") 
+        x = "Male-to-female mortality ratio")  + 
+  theme(text = element_text(size=15, family="LM Roman 10"))  +
+  theme(legend.title = element_text( size=13), legend.text=element_text(size=10),
+        plot.title = element_text(size=17))
 
 dev.off()
 
@@ -580,21 +639,21 @@ vaccination_track <- left_join(excess_male_mort, vaccination, by = c("Region", "
 
 vaccination_track %>% filter(Age == "85 years and over") %>% 
   ggplot(aes(x = Series_Complete_Pop_Pct, y = excess_male, color = isBiden)) +
-  geom_point() + scale_color_manual(values = c("#1d00d9", "#d90012")) +
+  geom_point() + scale_color_manual(values = c("#1d00d9", "#d90012"), "Voted for") +
   scale_y_log10(limits = c(0.5, 4)) +
   transition_time(Date) 
 
 
 vaccination_track %>% filter(Age == "75-84 years") %>% 
   ggplot(aes(x = Series_Complete_Pop_Pct, y = excess_male, color = isBiden)) +
-  geom_point() + scale_color_manual(values = c("#1d00d9", "#d90012")) +
+  geom_point() + scale_color_manual(values = c("#1d00d9", "#d90012"), "Voted for") +
   scale_y_log10(limits = c(0.5, 4)) +
   transition_time(Date) 
 
 
 vaccination_track %>% 
   ggplot(aes(x = Series_Complete_Pop_Pct, y = excess_male, color = isBiden)) +
-  geom_point() + scale_color_manual(values = c("#1d00d9", "#d90012")) +
+  geom_point() + scale_color_manual(values = c("#1d00d9", "#d90012"), "Voted for") +
   scale_y_log10(limits = c(0.5, 4)) +
   transition_time(Date) 
 
@@ -603,23 +662,54 @@ vaccination_track %>%
 
 vaccination_track %>% filter(Age == "85 years and over") %>%
   ggplot(aes(x = Series_Complete_Pop_Pct, y = Male, color = isBiden)) +
-  geom_point() + scale_color_manual(values = c("#1d00d9", "#d90012")) +
-  geom_smooth() +
+  geom_point() + scale_color_manual(values = c("#1d00d9", "#d90012"), "Voted for") +
   scale_y_log10() +
-  transition_time(Date) 
+  transition_time(Date)  +
+  labs(x = "% of population fully vaccinated",
+       y = "Male mortality rate")
+
+anim_save("./EPC 2022/Graphs/85+.gif")
+
+vaccination_track %>% filter(Age == "75-84 years") %>%
+  ggplot(aes(x = Series_Complete_Pop_Pct, y = Male, color = isBiden)) +
+  geom_point() + scale_color_manual(values = c("#1d00d9", "#d90012"), "Voted for")   +
+  transition_time(Date) +
+  labs(x = "% of population fully vaccinated",
+       y = "Male mortality rate") 
+
+anim_save("./EPC 2022/Graphs/75-84+.gif")
 
 vaccination_track %>% filter(Age == "65-74 years") %>%
   ggplot(aes(x = Series_Complete_Pop_Pct, y = Male, color = isBiden)) +
-  geom_point() + scale_color_manual(values = c("#1d00d9", "#d90012")) +
-  geom_smooth() +
-  scale_y_log10() +
-  transition_time(Date) 
+  geom_point() + scale_color_manual(values = c("#1d00d9", "#d90012"), "Voted for") +
+  transition_time(Date) +
+  labs(x = "% of population fully vaccinated",
+       y = "Male mortality rate") 
+
+anim_save("./EPC 2022/Graphs/65-74+.gif")
   
 vaccination_track %>% filter(Age == "55-64 years") %>%
   ggplot(aes(x = Series_Complete_Pop_Pct, y = Male, color = isBiden)) +
-  geom_point() + scale_color_manual(values = c("#1d00d9", "#d90012"))  +
-  scale_y_log10() +
-  transition_time(Date) 
+  geom_point() + scale_color_manual(values = c("#1d00d9", "#d90012"), "Voted for") +
+  transition_time(Date) +
+  labs(x = "% of population fully vaccinated",
+       y = "Male mortality rate") 
+
+anim_save("./EPC 2022/Graphs/55-64+.gif")
+
+
+vaccination_track %>% filter(Age == "55-64 years") %>%
+  ggplot(aes(x = Series_Complete_Pop_Pct, y = excess_male, color = isBiden)) +
+  geom_point() + scale_color_manual(values = c("#1d00d9", "#d90012"), "Voted for") +
+  transition_time(Date) +
+  labs(x = "% of population fully vaccinated",
+       y = "Male-to-female mortality rate") 
+
+anim_save("./EPC 2022/Graphs/M2F_55-64+.gif")
+
+
+
+
 
 vaccination_track %>% filter(Age == "45-54 years") %>%
   ggplot(aes(x = Series_Complete_Pop_Pct, y = Male, color = isBiden)) +
@@ -643,6 +733,17 @@ vaccination_track %>% filter(Age == "25-34 years") %>%
 
 
 
+# Lm , maybe?
+
+lm_vax <- lm(Male ~ Series_Complete_Pop_Pct + Date , data = vaccination_track %>% filter(Age == "55-64 years"))
+
+summary(lm_vax)
+
+
+lm_excess <- lm(excess_male ~ Series_Complete_Pop_Pct + Date + isBiden , data = vaccination_track %>% filter(Age == "55-64 years",
+                                                                                                   !is.infinite(excess_male)))
+
+summary(lm_excess)
 
 
 
@@ -738,25 +839,244 @@ Causes <- rbind(Causes, allcauses,C19_cumulative) %>%
 order <- ages_10[5:11]
 #---------------------
 
-Causes <- Causes %>% mutate(Age = factor(Age, levels = order)) %>% 
+Causes <- Causes %>% 
+  mutate(Age = factor(Age, levels = order)) %>% 
   filter(Age %in% order)
 
-tiff("./EPC 2022/Graphs/ridge_lines_Otherdiseases.tiff", width = 3300, height = 6000, res=500)
 
-Causes %>% filter(!(is.infinite(ratio))) %>% 
+# Only covid and one cause at a time
+
+Causes %>% pull(Cause) %>% unique()
+
+Causes <- Causes %>% mutate(ratio = ifelse(is.infinite(ratio), NA, ratio))
+
+tiff("./EPC 2022/Graphs/ridge_lines_heart.tiff", width = 4000, height = 5500, res=500)
+
+Causes %>% filter(Cause %in% c("COVID-19", "Diseases of the circulatory system")) %>% 
   ggplot(aes( x = ratio, y = Age, fill = Cause))+ 
   geom_density_ridges(alpha = 0.6,
                       quantile_lines = TRUE,
-                      quantile_fun = function(x,...)mean(x))+
-  theme_ridges(font_size = 12, grid = TRUE) +
-  theme_fivethirtyeight() + 
-  xlim(c(0.5,4)) + 
-  labs (title = "Male-to-female ratios of various diseases",
+                      quantile_fun = function(x,...)median(x))+
+  theme_ridges(font_size = 12, grid = TRUE) + 
+  labs (title = "Male-to-female ratio distribution of COVID-19 and \nDiseases of the circulatory system ",
         x = "Male-to-female mortality ratio",
         y = "Age groups") + 
-  geom_vline(xintercept = 1, color = "black")
+  geom_vline(xintercept = 1, color = "black") +
+  theme(legend.position = "bottom") + 
+  theme(text = element_text(size=15, family="LM Roman 10"))  +
+  theme(legend.title = element_text( size=13),
+        legend.text=element_text(size=10),
+        plot.title = element_text(size=17),        
+        axis.title=element_text(size=14,face="bold"),         
+        axis.text.y = element_text(size = 16, face = "bold")) +
+  scale_x_log10(limits = c(0.5, 4)) +
+  scale_fill_manual(values = c("#ffb703", "#d62828")) +
+  scale_y_discrete(labels = c("25-34", "35-44", "45-54", "55-64", "65-74", "75-84", "85+"))
 
 dev.off()
+
+
+
+tiff("./EPC 2022/Graphs/ridge_lines_diabetes.tiff", width = 4000, height = 5500, res=500)
+
+Causes %>% filter(Cause %in% c("COVID-19", "Diabetes mellitus")) %>% 
+  ggplot(aes( x = ratio, y = Age, fill = Cause))+ 
+  geom_density_ridges(alpha = 0.6,
+                      quantile_lines = TRUE,
+                      quantile_fun = function(x,...)median(x))+
+  theme_ridges(font_size = 12, grid = TRUE) + 
+  labs (title = "Male-to-female ratio distribution of COVID-19 and \nDiabetes ",
+        x = "Male-to-female mortality ratio",
+        y = "Age groups") + 
+  geom_vline(xintercept = 1, color = "black") +
+  theme(legend.position = "bottom") + 
+  theme(text = element_text(size=15, family="LM Roman 10"))  +
+  theme(legend.title = element_text( size=13),
+        legend.text=element_text(size=10),
+        plot.title = element_text(size=17),
+        axis.title=element_text(size=14,face="bold"),
+        axis.text.y = element_text(size = 16, face = "bold")) +
+  scale_x_log10(limits = c(0.5, 4)) +
+  scale_fill_manual(values = c("#ffb703", "#023047")) +
+  scale_y_discrete(labels = c("25-34", "35-44", "45-54", "55-64", "65-74", "75-84", "85+"))
+
+dev.off()
+
+
+tiff("./EPC 2022/Graphs/ridge_lines_allcause.tiff", width = 4000, height = 5500, res=500)
+
+Causes %>% filter(Cause %in% c("COVID-19", "All-cause")) %>% 
+  ggplot(aes( x = ratio, y = Age, fill = Cause))+ 
+  geom_density_ridges(alpha = 0.6,
+                      quantile_lines = TRUE,
+                      quantile_fun = function(x,...)median(x))+
+  theme_ridges(font_size = 12, grid = TRUE) + 
+  labs (title = "Male-to-female ratio distribution of COVID-19 and \nAll causes combined ",
+        x = "Male-to-female mortality ratio",
+        y = "Age groups") + 
+  geom_vline(xintercept = 1, color = "black") +
+  theme(legend.position = "bottom") + 
+  theme(text = element_text(size=15, family="LM Roman 10"))  +
+  theme(legend.title = element_text( size=13),
+        legend.text=element_text(size=10),
+        plot.title = element_text(size=17),         axis.title=element_text(size=14,face="bold"),         axis.text.y = element_text(size = 16, face = "bold")) +
+  scale_x_log10(limits = c(0.5, 4)) +
+  scale_fill_manual(values = c("#283618", "#ffb703"))+
+  scale_y_discrete(labels = c("25-34", "35-44", "45-54", "55-64", "65-74", "75-84", "85+"))
+
+dev.off()
+
+
+
+tiff("./EPC 2022/Graphs/ridge_lines_nervous_sys.tiff", width = 4000, height = 5500, res=500)
+
+Causes %>% filter(Cause %in% c("COVID-19", "Diseases of the nervous system")) %>% 
+  ggplot(aes( x = ratio, y = Age, fill = Cause))+ 
+  geom_density_ridges(alpha = 0.6,
+                      quantile_lines = TRUE,
+                      quantile_fun = function(x,...)median(x))+
+  theme_ridges(font_size = 12, grid = TRUE) + 
+  labs (title = "Male-to-female ratio distribution of COVID-19 and \nDiseases of the nervous system ",
+        x = "Male-to-female mortality ratio",
+        y = "Age groups") + 
+  geom_vline(xintercept = 1, color = "black") +
+  theme(legend.position = "bottom") + 
+  theme(text = element_text(size=15, family="LM Roman 10"))  +
+  theme(legend.title = element_text( size=13),
+        legend.text=element_text(size=10),
+        plot.title = element_text(size=17),         axis.title=element_text(size=14,face="bold"),         axis.text.y = element_text(size = 16, face = "bold")) +
+  scale_x_log10(limits = c(0.5, 4)) +
+  scale_fill_manual(values = c("#ffb703", "#555b6e"))+
+  scale_y_discrete(labels = c("25-34", "35-44", "45-54", "55-64", "65-74", "75-84", "85+"))
+
+dev.off()
+
+
+
+tiff("./EPC 2022/Graphs/ridge_lines_influenza.tiff", width = 4000, height = 5500, res=500)
+
+Causes %>% filter(Cause %in% c("COVID-19", "Influenza and pneumonia")) %>% 
+  ggplot(aes( x = ratio, y = Age, fill = Cause))+ 
+  geom_density_ridges(alpha = 0.6,
+                      quantile_lines = TRUE,
+                      quantile_fun = function(x,...)median(x))+
+  theme_ridges(font_size = 12, grid = TRUE) + 
+  labs (title = "Male-to-female ratio distribution of COVID-19 and \nInfluenza and pneumonia ",
+        x = "Male-to-female mortality ratio",
+        y = "Age groups") + 
+  geom_vline(xintercept = 1, color = "black") +
+  theme(legend.position = "bottom") + 
+  theme(text = element_text(size=15, family="LM Roman 10"))  +
+  theme(legend.title = element_text( size=13),
+        legend.text=element_text(size=10),
+        plot.title = element_text(size=17),         axis.title=element_text(size=14,face="bold"),         axis.text.y = element_text(size = 16, face = "bold")) +
+  scale_x_log10(limits = c(0.5, 4)) +
+  scale_fill_manual(values = c("#ffb703", "#571089"))+
+  scale_y_discrete(labels = c("25-34", "35-44", "45-54", "55-64", "65-74", "75-84", "85+"))
+
+dev.off()
+
+
+
+tiff("./EPC 2022/Graphs/ridge_lines_cancers.tiff", width = 4000, height = 5500, res=500)
+
+Causes %>% filter(Cause %in% c("COVID-19", "Malignant neoplasms")) %>% 
+  ggplot(aes( x = ratio, y = Age, fill = Cause))+ 
+  geom_density_ridges(alpha = 0.6,
+                      quantile_lines = TRUE,
+                      quantile_fun = function(x,...)median(x))+
+  theme_ridges(font_size = 12, grid = TRUE) + 
+  labs (title = "Male-to-female ratio distribution of COVID-19 and \nMalignant neoplasms",
+        x = "Male-to-female mortality ratio",
+        y = "Age groups") + 
+  geom_vline(xintercept = 1, color = "black") +
+  theme(legend.position = "bottom") + 
+  theme(text = element_text(size=15, family="LM Roman 10"))  +
+  theme(legend.title = element_text( size=13),
+        legend.text=element_text(size=10),
+        plot.title = element_text(size=17),         axis.title=element_text(size=14,face="bold"),         axis.text.y = element_text(size = 16, face = "bold")) +
+  scale_x_log10(limits = c(0.5, 4)) +
+  scale_fill_manual(values = c("#ffb703", "#43aa8b"))+
+  scale_y_discrete(labels = c("25-34", "35-44", "45-54", "55-64", "65-74", "75-84", "85+"))
+
+dev.off()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# For different death
+
+
+#'*With CDC Data*
+
+Causes %>% pull(Cause) %>% unique()
+
+all_causes <- Causes %>% 
+  filter(Cause %in% c("COVID-19", "All-cause"))
+
+for(age_group in ages_10){
+  
+  x <- all_causes %>% filter(Age== age_group) %>% ggplot(aes( x= State, y = ratio, color = Cause)) +
+    geom_point() + 
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank())+ labs(y = age_group) + 
+    scale_y_log10(limits = c(0.5,8))
+  
+  assign(paste("plot_allcause_",age_group, sep = ""), x)
+  
+}
+
+axis = all_causes %>% filter(Age=="25-34 years") %>% 
+  ggplot(aes(x= State, y = ratio, color = Cause)) + 
+  geom_point() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  theme(panel.ontop = TRUE,
+        axis.ticks.y=element_blank())+ labs(y = "   ")
+
+
+
+
+tiff("./EPC 2022/Graphs/general_allcause_CDC.tiff", width = 3300, height = 6000, res=500)
+
+ggpubr::ggarrange(`plot_allcause_25-34 years`,
+                  `plot_allcause_35-44 years`,
+                  `plot_allcause_45-54 years`,
+                  `plot_allcause_55-64 years`,
+                  `plot_allcause_65-74 years`,
+                  `plot_allcause_75-84 years`,
+                  `plot_allcause_85 years and over`,
+                  axis,
+                  common.legend = T,
+                  ncol = 1)
+
+dev.off()
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -770,21 +1090,23 @@ C19 <- Causes %>% filter(Cause == "COVID-19") %>%
 
 Other <- Causes %>% filter(Cause != "COVID-19")
 
-Other <- left_join(Other, C19, by = c("State", "Age")) %>% mutate(rate_ratio = C19_ratio/rate_ratio)
+Other <- left_join(Other, C19, by = c("State", "Age")) %>% mutate(rate_ratio = C19_ratio/ratio)
 
 Other  %>% filter(!(is.infinite(rate_ratio)),
                   Cause == "All-cause") %>%  
-  ggplot(aes( x = rate_ratio, y = Age, fill = Cause))+ 
+  ggplot(aes( x = rate_ratio, y = Age))+ 
   geom_density_ridges(alpha = 0.6,
                       quantile_lines = TRUE,
-                      quantile_fun = function(x,...)mean(x))+
+                      quantile_fun = function(x,...)mean(x),
+                      fill = "navy")+
   theme_ridges(font_size = 12, grid = TRUE) +
   theme_fivethirtyeight() + 
   xlim(c(0.5,4)) + 
   labs (title = "Male-to-female ratios of various diseases",
         x = "Male-to-female mortality ratio",
         y = "Age groups") + 
-  geom_vline(xintercept = 1, color = "black")
+  geom_vline(xintercept = 1, color = "black") +
+  scale_x_log10()
 
 dev.off()
 
